@@ -4,14 +4,18 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"golang.org/x/text/encoding/japanese"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
+	"unicode/utf8"
+
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 func failOnError(err error) {
@@ -23,35 +27,36 @@ func failOnError(err error) {
 func main() {
 	flag.Parse()
 
-	//ログファイル準備
+	// ログファイル準備
 	logfile, err := os.OpenFile("./log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	failOnError(err)
 	defer logfile.Close()
 
 	log.SetOutput(logfile)
 
+	log.Print("Start\r\n")
+
+	// ファイルを読み込んで二次元配列に入れる
+	records := readfile(flag.Arg(0))
+
+	// データの変換
+	dataConversion(flag.Arg(0), records)
+
+	log.Print("Finish !\r\n")
+
+}
+
+func readfile(filename string) [][]string {
 	//入力ファイル準備
-	infile, err := os.Open(flag.Arg(0))
+	infile, err := os.Open(filename)
 	failOnError(err)
 	defer infile.Close()
 
-	//書き込みファイル準備
-	outfile, err := os.Create("./沖電気カスタマアドテック健診データ（健保用）.csv")
-	failOnError(err)
-	defer outfile.Close()
-
 	reader := csv.NewReader(transform.NewReader(infile, japanese.ShiftJIS.NewDecoder()))
 	reader.Comma = '\t'
-	writer := csv.NewWriter(transform.NewWriter(outfile, japanese.ShiftJIS.NewEncoder()))
-	writer.UseCRLF = true
 
-	log.Print("Start\r\n")
-	//タイトル行を読み出す
-	_, err = reader.Read() // 1行読み出す
-	if err != io.EOF {
-		failOnError(err)
-	}
-
+	//CSVファイルを２次元配列に展開
+	readrecords := make([][]string, 0)
 	for {
 		record, err := reader.Read() // 1行読み出す
 		if err == io.EOF {
@@ -60,818 +65,995 @@ func main() {
 			failOnError(err)
 		}
 
-		var out_record []string
-		errPersonalInfo := record[18] + "," + record[8]
-
-		//  1:実施区分
-		out_record = append(out_record, "1")
-
-		//  2:プログラム種別
-		out_record = append(out_record, "030")
-
-		//  3:実施年月日
-		out_record = append(out_record, strings.Replace(record[17], "-", "", -1))
-
-		//  4:健診機関番号
-		out_record = append(out_record, "1311131242")
-
-		//  5:健診機関名称
-		out_record = append(out_record, "医療法人社団　松英会　馬込中央診療所")
-
-		//  6:健診機関郵便番号
-		out_record = append(out_record, "143-0027")
-
-		//  7:健診機関所在地
-		out_record = append(out_record, "東京都大田区中馬込１－５－８")
-
-		//  8:健診機関電話番号
-		out_record = append(out_record, "03-3773-6773")
-
-		//  9:保険者番号
-		if record[4] == "" {
-			log.Print("保健者番号なし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[4])
-
-		//  10:被保険者等記号
-		if record[5] == "" {
-			log.Print("保険証記号なし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[5])
-
-		//  11:被保険者等番号
-		if record[6] == "" {
-			log.Print("保険証番号なし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[6])
-
-		//  12:カナ氏名
-		if record[7] == "" {
-			log.Print("カナ氏名なし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, string(norm.NFKC.Bytes([]byte(record[7]))))
-
-		//  13:漢字氏名
-		if record[8] == "" {
-			log.Print("漢字氏名なし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[8])
-
-		//  14:生年月日
-		if record[10] == "" {
-			log.Print("生年月日なし:" + errPersonalInfo + "\r\n")
-		}
-		if WaToSeireki(record[10]) == "err" {
-			log.Print("生年月日エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, WaToSeireki(record[10]))
-
-		//  15:男女区分
-		if record[9] == "" {
-			log.Print("性別なし:" + errPersonalInfo + "\r\n")
-		}
-		if Sei(record[9]) == "err" {
-			log.Print("性別エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, Sei(record[9]))
-
-		//  16:郵便番号
-		if record[11] == "" {
-			log.Print("郵便番号なし:", errPersonalInfo+"\r\n")
-		}
-		out_record = append(out_record, record[11])
-
-		//  17:住所
-		if record[12] == "" {
-			log.Print("住所なし:", errPersonalInfo+"\r\n")
-		}
-		out_record = append(out_record, strings.Trim(record[12]+"　"+record[13], "　"))
-
-		//  18:受診券整理番号
-		out_record = append(out_record, "")
-
-		//  19:受診券有効期限
-		out_record = append(out_record, "")
-
-		//  20:健診種別コード
-		out_record = append(out_record, "")
-
-		//  21:事業所コード
-		out_record = append(out_record, "")
-
-		//  22:社員番号
-		out_record = append(out_record, record[14])
-
-		//  23:予備
-		out_record = append(out_record, "")
-
-		//  24:予備
-		out_record = append(out_record, "")
-
-		//  25:予備
-		out_record = append(out_record, "")
-
-		//  26:予備
-		out_record = append(out_record, "")
-
-		//  27:予備
-		out_record = append(out_record, "")
-
-		//  28:予備
-		out_record = append(out_record, "")
-
-		//  29:身長
-		if record[19] == "" {
-			log.Print("身長なし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[19])
-
-		//  30:体重
-		if record[20] == "" {
-			log.Print("体重なし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[20])
-
-		//  31:BMI
-		if record[21] == "" {
-			log.Print("BMIなし:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[21])
-
-		//  32:腹囲測定法
-		//  33:腹囲
-		if record[22] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "1")
-			out_record = append(out_record, record[22])
-		}
-
-		//  34:内臓脂肪面積
-		out_record = append(out_record, "")
-
-		//  35:下限値
-		out_record = append(out_record, "")
-
-		//  36:上限値
-		out_record = append(out_record, "")
-
-		//  37:収縮期血圧区分
-		//  38:収縮期血圧
-		if record[23] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else if record[25] == "" {
-			out_record = append(out_record, "2")
-			out_record = append(out_record, record[23])
-		} else {
-			d38_1, _ := strconv.Atoi(record[23])
-			d38_2, _ := strconv.Atoi(record[25])
-			d38 := (d38_1 + d38_2) / 2
-			out_record = append(out_record, "1")
-			out_record = append(out_record, fmt.Sprint(d38))
-		}
-
-		//  39:下限値
-		out_record = append(out_record, "")
-
-		//  40:上限値
-		out_record = append(out_record, "")
-
-		//  41:欠番
-		out_record = append(out_record, "")
-
-		//  42:欠番
-		out_record = append(out_record, "")
-
-		//  43:欠番
-		out_record = append(out_record, "")
-
-		//  44:拡張期血圧区分
-		//  45:拡張期血圧
-		if record[24] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else if record[26] == "" {
-			out_record = append(out_record, "2")
-			out_record = append(out_record, record[24])
-		} else {
-			d45_1, _ := strconv.Atoi(record[24])
-			d45_2, _ := strconv.Atoi(record[26])
-			d45 := (d45_1 + d45_2) / 2
-			out_record = append(out_record, "1")
-			out_record = append(out_record, fmt.Sprint(d45))
-		}
-
-		//  46:下限値
-		out_record = append(out_record, "")
-
-		//  47:上限値
-		out_record = append(out_record, "")
-
-		//  48:欠番
-		out_record = append(out_record, "")
-
-		//  49:欠番
-		out_record = append(out_record, "")
-
-		//  50:欠番
-		out_record = append(out_record, "")
-
-		//  51:総コレステロール測定法
-		//  52:総コレステロール
-		if record[27] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "01")
-			out_record = append(out_record, record[27])
-		}
-
-		//  53:下限値
-		out_record = append(out_record, "")
-
-		//  54:上限値
-		out_record = append(out_record, "")
-
-		//  55:HDLコレステロール測定法
-		//  56:HDLコレステロール
-		if record[28] == "" {
-			log.Print("HDL-Cなし:" + errPersonalInfo + "\r\n")
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "01")
-			out_record = append(out_record, record[28])
-		}
-
-		//  57:下限値
-		out_record = append(out_record, "")
-
-		//  58:上限値
-		out_record = append(out_record, "")
-
-		//  59:LDLコレステロール測定法
-		//  60:LDLコレステロール
-		if record[29] == "" {
-			log.Print("LDL-Cなし:" + errPersonalInfo + "\r\n")
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "01")
-			out_record = append(out_record, record[29])
-		}
-
-		//  61:下限値
-		out_record = append(out_record, "")
-
-		//  62:上限値
-		out_record = append(out_record, "")
-
-		//  63:中性脂肪測定法
-		//  64:中性脂肪
-		if record[30] == "" {
-			log.Print("中性脂肪なし:" + errPersonalInfo + "\r\n")
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "01")
-			out_record = append(out_record, record[30])
-		}
-
-		//  65:下限値
-		out_record = append(out_record, "")
-
-		//  66:上限値
-		out_record = append(out_record, "")
-
-		//  67:GOT(AST)測定法
-		//  68:GOT(AST)
-		if record[31] == "" {
-			log.Print("GOTなし:" + errPersonalInfo + "\r\n")
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "02")
-			out_record = append(out_record, record[31])
-		}
-
-		//  69:下限値
-		out_record = append(out_record, "")
-
-		//  70:上限値
-		out_record = append(out_record, "")
-
-		//  71:GPT(ALT)測定法
-		//  72:GPT(ALT)
-		if record[32] == "" {
-			log.Print("GPTなし:" + errPersonalInfo + "\r\n")
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "02")
-			out_record = append(out_record, record[32])
-		}
-
-		//  73:下限値
-		out_record = append(out_record, "")
-
-		//  74:上限値
-		out_record = append(out_record, "")
-
-		//  75:γGTP測定法
-		//  76:γGTP
-		if record[33] == "" {
-			log.Print("γGTP:" + errPersonalInfo + "\r\n")
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, "01")
-			out_record = append(out_record, record[33])
-		}
-		//  77:下限値
-		out_record = append(out_record, "")
-
-		//  78:上限値
-		out_record = append(out_record, "")
-
-		//  79:空腹時血糖測定法
-		//  80:空腹時血糖
-		//  81:下限値
-		//  82:上限値
-		//  83:随時血糖測定法
-		//  84:随時血糖
-		//  85:下限値
-		//  86:上限値
-		//  87:HbA1c測定法
-		//  88:HbA1c
-		//  89:下限値
-		//  90:上限値
-		Eattime, _ := strconv.Atoi(record[108])
-		if record[34] == "" {
-			if record[35] == "" {
-				log.Print("血糖・HbA1cなし:" + errPersonalInfo + "\r\n")
-				out_record = append(out_record, "") // 79
-				out_record = append(out_record, "") // 80
-				out_record = append(out_record, "") // 81
-				out_record = append(out_record, "") // 82
-				out_record = append(out_record, "") // 83
-				out_record = append(out_record, "") // 84
-				out_record = append(out_record, "") // 85
-				out_record = append(out_record, "") // 86
-				out_record = append(out_record, "") // 87
-				out_record = append(out_record, "") // 88
-				out_record = append(out_record, "") // 89
-				out_record = append(out_record, "") // 90
-			} else {
-				out_record = append(out_record, "")         // 79
-				out_record = append(out_record, "")         // 80
-				out_record = append(out_record, "")         // 81
-				out_record = append(out_record, "")         // 82
-				out_record = append(out_record, "")         // 83
-				out_record = append(out_record, "")         // 84
-				out_record = append(out_record, "")         // 85
-				out_record = append(out_record, "")         // 86
-				out_record = append(out_record, "14")       // 87
-				out_record = append(out_record, record[35]) // 88
-				out_record = append(out_record, "")         // 89
-				out_record = append(out_record, "")         // 90
-			}
-		} else {
-			if (record[107] == "とった") && (Eattime < 10) {
-				out_record = append(out_record, "")         // 79
-				out_record = append(out_record, "")         // 80
-				out_record = append(out_record, "")         // 81
-				out_record = append(out_record, "")         // 82
-				out_record = append(out_record, "01")       // 83
-				out_record = append(out_record, record[34]) // 84
-				out_record = append(out_record, "")         // 85
-				out_record = append(out_record, "")         // 86
-				if record[35] == "" {
-					log.Print("空腹時血糖検査なし:" + errPersonalInfo + "\r\n")
-					out_record = append(out_record, "") // 87
-					out_record = append(out_record, "") // 88
-					out_record = append(out_record, "") // 89
-					out_record = append(out_record, "") // 90
-				} else {
-					out_record = append(out_record, "14")       // 87
-					out_record = append(out_record, record[35]) // 88
-					out_record = append(out_record, "")         // 89
-					out_record = append(out_record, "")         // 90
-				}
-			} else {
-				out_record = append(out_record, "01")       // 79
-				out_record = append(out_record, record[34]) // 80
-				out_record = append(out_record, "")         // 81
-				out_record = append(out_record, "")         // 82
-				out_record = append(out_record, "")         // 83
-				out_record = append(out_record, "")         // 84
-				out_record = append(out_record, "")         // 85
-				out_record = append(out_record, "")         // 86
-				if record[35] == "" {
-					out_record = append(out_record, "") // 87
-					out_record = append(out_record, "") // 88
-					out_record = append(out_record, "") // 89
-					out_record = append(out_record, "") // 90
-				} else {
-					out_record = append(out_record, "14")       // 87
-					out_record = append(out_record, record[35]) // 88
-					out_record = append(out_record, "")         // 89
-					out_record = append(out_record, "")         // 90
-				}
-			}
-		}
-
-		//  91:赤血球
-		out_record = append(out_record, record[36])
-
-		//  92:下限値
-		out_record = append(out_record, "")
-
-		//  93:上限値
-		out_record = append(out_record, "")
-
-		//  94:血色素量
-		out_record = append(out_record, record[37])
-
-		//  95:下限値
-		out_record = append(out_record, "")
-
-		//  96:上限値
-		out_record = append(out_record, "")
-
-		//  97:ヘマトクリット
-		out_record = append(out_record, record[38])
-
-		//  98:下限値
-		out_record = append(out_record, "")
-
-		//  99:上限値
-		out_record = append(out_record, "")
-
-		//  100:貧血検査実施理由
-		out_record = append(out_record, "")
-
-		//  101:MCHC
-		out_record = append(out_record, record[39])
-
-		//  102:下限値
-		out_record = append(out_record, "")
-
-		//  103:上限値
-		out_record = append(out_record, "")
-
-		//  104:尿糖定性区分
-		//  105:尿糖定性
-		if record[40] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			if Nyou(record[40]) == "err" {
-				log.Print("尿糖コード変換エラー:" + errPersonalInfo + "\r\n")
-			}
-			out_record = append(out_record, "1")
-			out_record = append(out_record, Nyou(record[40]))
-		}
-
-		//  106:尿蛋白定性区分
-		//  107:尿蛋白定性
-		if record[41] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			if Nyou(record[41]) == "err" {
-				log.Print("尿蛋白コード変換エラー:" + errPersonalInfo + "\r\n")
-			}
-			out_record = append(out_record, "1")
-			out_record = append(out_record, Nyou(record[41]))
-		}
-
-		//  108:心電図（所見の有無）
-		//  109:心電図所見
-		if record[42] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			if Syokenumu(record[42]) == "err" {
-				log.Print("心電図判定変換エラー:" + errPersonalInfo + "\r\n")
-			}
-			out_record = append(out_record, Syokenumu(record[42]))
-			out_record = append(out_record, strings.Trim(record[43]+"　"+record[44]+"　"+record[45]+"　"+record[46], "　"))
-		}
-
-		//  110:心電図実施理由
-		out_record = append(out_record, "")
-
-		//	※沖カスタマアドテックは眼底検査なし。便宜上右のデータを入れる事にする。
-		//  111:眼底検査（シェイエ分類：Ｈ）
-		if HyScConv(record[49]) == "err" {
-			log.Print("Hy変換エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, HyScConv(record[49]))
-
-		//  112:欠番
-		out_record = append(out_record, "")
-
-		//  113:欠番
-		out_record = append(out_record, "")
-
-		//  114:眼底検査（シェイエ分類：Ｓ）
-		if HyScConv(record[48]) == "err" {
-			log.Print("Sc変換エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, HyScConv(record[48]))
-
-		//  115:欠番
-		out_record = append(out_record, "")
-
-		//  116:欠番
-		out_record = append(out_record, "")
-
-		//  117:眼底検査（キースワグナー分類）
-		if KwConv(record[47]) == "err" {
-			log.Print("Kw変換エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, KwConv(record[47]))
-
-		//  118:欠番
-		out_record = append(out_record, "")
-
-		//  119:欠番
-		out_record = append(out_record, "")
-
-		//  120:眼底検査（SCOTT分類)
-		if ScottConv(record[50]) == "err" {
-			log.Print("Scott変換エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, ScottConv(record[50]))
-
-		//  121:眼底検査(その他の所見)
-		if record[55] == "" {
-			out_record = append(out_record, "")
-		} else {
-			out_record = append(out_record, strings.Trim(record[55]+record[56]+record[57]+record[58], " "))
-		}
-
-		//  122:眼底検査実施理由
-		out_record = append(out_record, "")
-
-		//  123:他覚症状
-		//  124:他覚症状所見
-		if record[59] == "" {
-			out_record = append(out_record, "")
-			out_record = append(out_record, "")
-		} else {
-			if Syokenumu(record[59]) == "err" {
-				log.Print("内科診察判定変換エラー:" + errPersonalInfo + "\r\n")
-			}
-			out_record = append(out_record, Syokenumu(record[59]))
-			out_record = append(out_record, strings.Trim(record[60]+"　"+record[61]+"　"+record[62], "　"))
-		}
-
-		//  125:具体的な既往歴
-		D125_1 := KiouJoin(record[63], record[64], record[65])
-		D125_2 := KiouJoin(record[66], record[67], record[68])
-		D125_3 := KiouJoin(record[69], record[70], record[71])
-		D125_4 := KiouJoin(record[72], record[73], record[74])
-		D125_5 := KiouJoin(record[75], record[76], record[77])
-		D125 := strings.Trim(D125_1+"／"+D125_2+"／"+D125_3+"／"+D125_4+"／"+D125_5, "／")
-		out_record = append(out_record, D125)
-
-		//  126:欠番
-		out_record = append(out_record, "")
-
-		//  127:欠番
-		out_record = append(out_record, "")
-
-		//  128:欠番
-		out_record = append(out_record, "")
-
-		//  129:欠番
-		out_record = append(out_record, "")
-
-		//  130:欠番
-		out_record = append(out_record, "")
-
-		//  131:欠番
-		out_record = append(out_record, "")
-
-		//  132:欠番
-		out_record = append(out_record, "")
-
-		//  133:欠番
-		out_record = append(out_record, "")
-
-		//  134:欠番
-		out_record = append(out_record, "")
-
-		//  135:既往歴
-		if D125 == "" {
-			out_record = append(out_record, "2")
-		} else {
-			out_record = append(out_record, "1")
-		}
-
-		//  136:保健指導レベル
-		if HokenConv(record[78]) == "err" {
-			log.Print("保健指導レベルエラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, HokenConv(record[78]))
-
-		//  137:医師の診断（判定）
-		if record[79] == "" {
-			log.Print("総合判定が入っていません:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, record[79])
-
-		//  138:健診実施医師名
-		out_record = append(out_record, "寺門　節雄")
-
-		//  139:メタボリックシンドローム判定
-		if MetaboConv(record[81]) == "err" {
-			log.Print("メタボリックシンドローム判定エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, MetaboConv(record[81]))
-
-		//  140:病歴(脳血管疾患）
-		if YesNo(record[82]) == "err" {
-			log.Print("病歴(脳血管疾患)エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[82]))
-
-		//  141:病歴（心血管）
-		if YesNo(record[83]) == "err" {
-			log.Print("病歴(心血管)エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[83]))
-
-		//  142:病歴（腎不全・人工透析）
-		if YesNo(record[84]) == "err" {
-			log.Print("病歴(腎不全・人工透析)エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[84]))
-
-		//  143:病歴（貧血）
-		if YesNo(record[85]) == "err" {
-			log.Print("病歴(貧血)エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[85]))
-
-		//  144:服薬1（血圧）
-		if YesNo(record[86]) == "err" {
-			log.Print("服薬1(血圧)エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[86]))
-
-		//  145:服薬2（血糖）
-		if YesNo(record[87]) == "err" {
-			log.Print("服薬2(血糖)エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[87]))
-
-		//  146:服薬3（脂質）
-		if YesNo(record[88]) == "err" {
-			log.Print("服薬3(脂質)エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[88]))
-
-		//  147:喫煙区分
-		if YesNo(record[89]) == "err" {
-			log.Print("喫煙区分エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[89]))
-
-		//  148:欠番
-		out_record = append(out_record, "")
-
-		//  149:問　20歳から10kg以上の体重増
-		if YesNo(record[90]) == "err" {
-			log.Print("20歳から体重増加エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[90]))
-
-		//  150:問　30分以上の運動習慣
-		if YesNo(record[91]) == "err" {
-			log.Print("運動習慣:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[91]))
-
-		//  151:問　身体活動を1日1時間以上
-		if YesNo(record[92]) == "err" {
-			log.Print("身体活動エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[92]))
-
-		//  152:問　歩行速度 同性同年齢比較で速い
-		if YesNo(record[93]) == "err" {
-			log.Print("歩行速度エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[93]))
-
-		//  153:問　1年間の体重変化±3kg以上
-		if YesNo(record[94]) == "err" {
-			log.Print("1年間の体重変化エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[94]))
-
-		//  154:問　食べ方（早食い）
-		if Eat(record[95]) == "err" {
-			log.Print("早食いエラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, Eat(record[95]))
-
-		//  155:問　就寝前2H以内夕食、3回/週
-		if YesNo(record[96]) == "err" {
-			log.Print("就寝前夕食エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[96]))
-
-		//  156:問　食べ方（夜食/間食）3回/週
-		if YesNo(record[97]) == "err" {
-			log.Print("夜食エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[97]))
-
-		//  157:問　朝食抜き3回/週
-		if YesNo(record[98]) == "err" {
-			log.Print("朝食抜きエラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[98]))
-
-		//  158:問　飲酒習慣
-		if Sake(record[99]) == "err" {
-			log.Print("飲酒エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, Sake(record[99]))
-
-		//  159:飲酒量（飲酒日）
-		if Sakeryo(record[100]) == "err" {
-			log.Print("飲酒量/日エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, Sakeryo(record[100]))
-
-		//  160:問　睡眠で休養がとれる
-		if YesNo(record[101]) == "err" {
-			log.Print("睡眠休養エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[101]))
-
-		//  161:生活習慣改善意識
-		if Seikatsu(record[102]) == "err" {
-			log.Print("生活習慣改善エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, Seikatsu(record[102]))
-
-		//  162:保健指導利用希望
-		if YesNo(record[103]) == "err" {
-			log.Print("保健指導希望エラー:" + errPersonalInfo + "\r\n")
-		}
-		out_record = append(out_record, YesNo(record[103]))
-
-		//  163:自覚症状
-		//  164:自覚症状所見
-		D164 := strings.Trim(record[104]+"　"+record[105]+"　"+record[106], "　")
-		if D164 == "" {
-			out_record = append(out_record, "2")
-		} else if strings.Index(D164, "特になし") >= 0 {
-			out_record = append(out_record, "2")
-		} else {
-			out_record = append(out_record, "1")
-		}
-
-		out_record = append(out_record, D164)
-
-		//  165:服薬1(血圧)(薬剤名)
-		out_record = append(out_record, "")
-
-		//  166:服薬1(血圧)(実施理由)
-		out_record = append(out_record, "")
-
-		//  167:服薬2(血糖)(薬剤名)
-		out_record = append(out_record, "")
-
-		//  168:服薬2(血糖)(実施理由)
-		out_record = append(out_record, "")
-
-		//  169:服薬3(脂質)(薬剤名)
-		out_record = append(out_record, "")
-
-		//  170:服薬3(脂質)(実施理由)
-		out_record = append(out_record, "")
-
-		//  171:採血時間(食後)
-		if (record[107] == "とった") && (Eattime < 10) {
-			out_record = append(out_record, "1")
-		} else {
-			out_record = append(out_record, "2")
-		}
-
-		// １行書き出す
-		writer.Write(out_record)
+		readrecords = append(readrecords, record)
 	}
+
+	return readrecords
+}
+
+func dataConversion(filename string, inRecs [][]string) {
+	recLen := 213 //出力するレコードの項目数
+	cRec := make([]string, recLen)
+	var I int
+
+	// 出力ファイル準備
+	//outDir, outfileName := filepath.Split(filename)
+	//pos := strings.LastIndex(outfileName, ".")
+	//outfile, err := os.Create(outDir + outfileName[:pos] + "d.txt")
+	// outfile, err := os.Create(outDir + outfileName[:pos] + ".txt")
+	outDir, _ := filepath.Split(filename)
+	day := time.Now()
+	outfile, err := os.Create(outDir + "トヨタ東京販売ホールディングス健診データ" + day.Format("20060102") + ".txt")
+	failOnError(err)
+	defer outfile.Close()
+
+	writer := csv.NewWriter(transform.NewWriter(outfile, japanese.ShiftJIS.NewEncoder()))
+	writer.Comma = '\t'
+	writer.UseCRLF = true
+
+	// 1行目（タイトル）
+	for I, _ = range cRec {
+		cRec[I] = ""
+	}
+
+	cRec[0] = "idou.sya_bg"
+	cRec[18] = "knk_kenkork.jushin_date"
+	cRec[21] = "knk_kenkork_kensa.kensa_val_071"
+	cRec[26] = "knk_kenkork_kensa.kensa_val_005"
+	cRec[27] = "knk_kenkork_kensa.kensa_val_006"
+	cRec[28] = "knk_kenkork_kensa.kensa_val_007"
+	cRec[30] = "knk_kenkork_kensa.kensa_val_008"
+	cRec[32] = "knk_kenkork_kensa.kensa_val_001"
+	cRec[33] = "knk_kenkork_kensa.kensa_val_002"
+	cRec[34] = "knk_kenkork_kensa.kensa_val_003"
+	cRec[35] = "knk_kenkork_kensa.kensa_val_023"
+	cRec[36] = "knk_kenkork_kensa.kensa_val_027"
+	cRec[37] = "knk_kenkork_kensa.kensa_val_025"
+	cRec[38] = "knk_kenkork_kensa.kensa_val_024"
+	cRec[39] = "knk_kenkork_kensa.kensa_val_028"
+	cRec[40] = "knk_kenkork_kensa.kensa_val_026"
+	cRec[43] = "knk_kenkork_kensa.kensa_val_039"
+	cRec[44] = "knk_kenkork_kensa.kensa_val_038"
+	cRec[45] = "knk_kenkork_kensa.kensa_val_037"
+	cRec[46] = "knk_kenkork_kensa.kensa_val_033"
+	cRec[47] = "knk_kenkork_kensa.kensa_val_034"
+	cRec[48] = "knk_kenkork_kensa.kensa_val_035"
+	cRec[51] = "knk_kenkork_kensa.kensa_val_041"
+	cRec[54] = "knk_kenkork_kensa.kensa_val_042"
+	cRec[61] = "knk_kenkork_kensa.kensa_val_031"
+	cRec[62] = "knk_kenkork_kensa.kensa_val_030"
+	cRec[67] = "knk_kenkork_kensa.kensa_val_047"
+	cRec[69] = "knk_kenkork_kensa.kensa_val_021"
+	cRec[75] = "knk_kenkork_kensa.kensa_val_010"
+	cRec[76] = "knk_kenkork_kensa.kensa_val_011"
+	cRec[77] = "knk_kenkork_kensa.kensa_val_012"
+	cRec[78] = "knk_kenkork_kensa.kensa_val_013"
+	cRec[161] = "knk_kenkork_kensa.kensa_val_072"
+	cRec[169] = "knk_kenkork_kensa.kensa_val_049"
+	cRec[172] = "knk_kenkork_kensa.kensa_val_050"
+	cRec[175] = "knk_kenkork_kensa.kensa_val_051"
+	cRec[178] = "knk_kenkork_kensa.kensa_val_052"
+	cRec[179] = "knk_kenkork_kensa.kensa_val_053"
+	cRec[180] = "knk_kenkork_kensa.kensa_val_054"
+	cRec[181] = "knk_kenkork_kensa.kensa_val_055"
+	cRec[182] = "knk_kenkork_kensa.kensa_val_056"
+	cRec[183] = "knk_kenkork_kensa.kensa_val_057"
+	cRec[184] = "knk_kenkork_kensa.kensa_val_058"
+	cRec[185] = "knk_kenkork_kensa.kensa_val_059"
+	cRec[186] = "knk_kenkork_kensa.kensa_val_060"
+	cRec[187] = "knk_kenkork_kensa.kensa_val_061"
+	cRec[188] = "knk_kenkork_kensa.kensa_val_062"
+	cRec[189] = "knk_kenkork_kensa.kensa_val_063"
+	cRec[190] = "knk_kenkork_kensa.kensa_val_064"
+	cRec[191] = "knk_kenkork_kensa.kensa_val_065"
+	cRec[192] = "knk_kenkork_kensa.kensa_val_066"
+	cRec[193] = "knk_kenkork_kensa.kensa_val_067"
+	cRec[194] = "knk_kenkork_kensa.kensa_val_068"
+	cRec[195] = "knk_kenkork_kensa.kensa_val_069"
+	cRec[196] = "knk_kenkork_kensa.kensa_val_070"
+	cRec[203] = "knk_kenkork_kensa.kensa_val_020"
+	cRec[204] = "knk_kenkork_kensa.hantei_val_020"
+	cRec[205] = "knk_kenkork_kensa.kensa_val_044"
+	cRec[206] = "knk_kenkork_kensa.kensa_val_045"
+	cRec[207] = "knk_kenkork_kensa.kensa_val_016"
+	cRec[208] = "knk_kenkork_kensa.kensa_val_017"
+	cRec[209] = "knk_kenkork_kensa.kensa_val_018"
+	cRec[210] = "knk_kenkork_kensa.kensa_val_019"
+	cRec[211] = "knk_kenkork_kensa.kensa_val_046"
+	cRec[212] = "knk_kenkork_kensa.hantei_val_046"
+	writer.Write(cRec)
+
+	// 2行目（タイトル）
+	for I, _ = range cRec {
+		cRec[I] = ""
+	}
+
+	cRec[0] = "社員番号"
+	cRec[18] = "受診日付"
+	cRec[21] = "検査コード071_医療機関側判定結果"
+	cRec[26] = "検査コード005_医療機関側検査値"
+	cRec[27] = "検査コード006_医療機関側検査値"
+	cRec[28] = "検査コード007_医療機関側検査値"
+	cRec[30] = "検査コード008_医療機関側検査値"
+	cRec[32] = "検査コード001_医療機関側検査値"
+	cRec[33] = "検査コード02_医療機関側判定結果"
+	cRec[34] = "検査コード003_医療機関側検査値"
+	cRec[35] = "検査コード023_医療機関側検査値"
+	cRec[36] = "検査コード027_医療機関側検査値"
+	cRec[37] = "検査コード025_医療機関側検査値"
+	cRec[38] = "検査コード024_医療機関側検査値"
+	cRec[39] = "検査コード028_医療機関側検査値"
+	cRec[40] = "検査コード026_医療機関側検査値"
+	cRec[43] = "検査コード039_医療機関側検査値"
+	cRec[44] = "検査コード038_医療機関側検査値"
+	cRec[45] = "検査コード037_医療機関側検査値"
+	cRec[46] = "検査コード033_医療機関側検査値"
+	cRec[47] = "検査コード034_医療機関側検査値"
+	cRec[48] = "検査コード035_医療機関側検査値"
+	cRec[51] = "検査コード041_医療機関側検査値"
+	cRec[54] = "検査コード042_医療機関側検査値"
+	cRec[61] = "検査コード031_医療機関側検査値"
+	cRec[62] = "検査コード030_医療機関側判定結果"
+	cRec[67] = "検査コード047_医療機関側検査値"
+	cRec[69] = "検査コード021_医療機関側検査値"
+	cRec[75] = "検査コード010_医療機関側検査値"
+	cRec[76] = "検査コード011_医療機関側検査値"
+	cRec[77] = "検査コード012_医療機関側検査値"
+	cRec[78] = "検査コード013_医療機関側検査値"
+	cRec[161] = "検査コード072_医療機関側検査値"
+	cRec[169] = "検査コード049_医療機関側検査値"
+	cRec[172] = "検査コード050_医療機関側検査値"
+	cRec[175] = "検査コード051_医療機関側検査値"
+	cRec[178] = "検査コード052_医療機関側検査値"
+	cRec[179] = "検査コード053_医療機関側検査値"
+	cRec[180] = "検査コード054_医療機関側検査値"
+	cRec[181] = "検査コード055_医療機関側検査値"
+	cRec[182] = "検査コード056_医療機関側検査値"
+	cRec[183] = "検査コード057_医療機関側検査値"
+	cRec[184] = "検査コード058_医療機関側検査値"
+	cRec[185] = "検査コード059_医療機関側検査値"
+	cRec[186] = "検査コード060_医療機関側検査値"
+	cRec[187] = "検査コード061_医療機関側検査値"
+	cRec[188] = "検査コード062_医療機関側検査値"
+	cRec[189] = "検査コード063_医療機関側検査値"
+	cRec[190] = "検査コード064_医療機関側検査値"
+	cRec[191] = "検査コード065_医療機関側検査値"
+	cRec[192] = "検査コード066_医療機関側検査値"
+	cRec[193] = "検査コード067_医療機関側検査値"
+	cRec[194] = "検査コード068_医療機関側検査値"
+	cRec[195] = "検査コード069_医療機関側検査値"
+	cRec[196] = "検査コード070_医療機関側検査値"
+	cRec[203] = "検査コード020_医療機関側検査値"
+	cRec[204] = "検査コード020_医療機関側検査値"
+	cRec[205] = "検査コード044_医療機関側検査値"
+	cRec[206] = "検査コード045_医療機関側検査値"
+	cRec[207] = "検査コード016_医療機関側検査値"
+	cRec[208] = "検査コード017_医療機関側検査値"
+	cRec[209] = "検査コード018_医療機関側検査値"
+	cRec[210] = "検査コード019_医療機関側検査値"
+	cRec[211] = "検査コード046_医療機関側検査値"
+	cRec[212] = "検査コード046_医療機関側検査値"
+	writer.Write(cRec)
+
+	// 3行目（タイトル）
+	for I, _ = range cRec {
+		cRec[I] = ""
+	}
+
+	cRec[0] = "社員番号"
+	cRec[1] = "組合コード"
+	cRec[2] = "受診者ID"
+	cRec[3] = "保険証記号"
+	cRec[4] = "保険証番号"
+	cRec[5] = "続柄"
+	cRec[6] = "枝番"
+	cRec[7] = "所属コード"
+	cRec[8] = "所属名称"
+	cRec[9] = "加入番号"
+	cRec[10] = "扶養番号"
+	cRec[11] = "受診者区分"
+	cRec[12] = "性別"
+	cRec[13] = "氏名漢字"
+	cRec[14] = "氏名カナ"
+	cRec[15] = "生年月日"
+	cRec[16] = "実施年度"
+	cRec[17] = "年齢"
+	cRec[18] = "受診日"
+	cRec[19] = "健診区分"
+	cRec[20] = "医療機関コード"
+	cRec[21] = "医療機関名称"
+	cRec[22] = "機関コード"
+	cRec[23] = "機関名称"
+	cRec[24] = "機関住所"
+	cRec[25] = "受付NO"
+	cRec[26] = "身長"
+	cRec[27] = "体重"
+	cRec[28] = "BMI"
+	cRec[29] = "内臓脂肪面積"
+	cRec[30] = "腹囲"
+	cRec[31] = "業務歴"
+	cRec[32] = "既往歴"
+	cRec[33] = "自覚症状"
+	cRec[34] = "他覚症状"
+	cRec[35] = "収縮期血圧(その他)"
+	cRec[36] = "収縮期血圧(２回目)"
+	cRec[37] = "収縮期血圧(１回目)"
+	cRec[38] = "拡張期血圧(その他)"
+	cRec[39] = "拡張期血圧(２回目)"
+	cRec[40] = "拡張期血圧(１回目)"
+	cRec[41] = "採血時間"
+	cRec[42] = "総コレステロール"
+	cRec[43] = "中性脂肪"
+	cRec[44] = "HDLコレステロール"
+	cRec[45] = "LDLコレステロール"
+	cRec[46] = "GOT(AST)"
+	cRec[47] = "GPT(ALT)"
+	cRec[48] = "γ-GT(γ-GTP)"
+	cRec[49] = "血清クレアチニン"
+	cRec[50] = "血清尿酸"
+	cRec[51] = "空腹時血糖"
+	cRec[52] = "随時血糖"
+	cRec[53] = "HbA1c"
+	cRec[54] = "HbA1c(NGSP)"
+	cRec[55] = "尿糖"
+	cRec[56] = "尿蛋白"
+	cRec[57] = "尿潜血"
+	cRec[58] = "尿素窒素"
+	cRec[59] = "尿ウロビリノーゲン"
+	cRec[60] = "ヘマトクリット値"
+	cRec[61] = "血色素量(ヘモグロビン値)"
+	cRec[62] = "赤血球数"
+	cRec[63] = "貧血検査実施理由"
+	cRec[64] = "白血球数"
+	cRec[65] = "血小板数"
+	cRec[66] = "血清アミラーゼ"
+	cRec[67] = "心電図(所見)"
+	cRec[68] = "心電図(実施理由)"
+	cRec[69] = "胸部X線検査(所見)"
+	cRec[70] = "胸部X線検査(撮影年月日)"
+	cRec[71] = "喀痰検査(塗抹鏡検 一般細菌)(所見)"
+	cRec[72] = "喀痰検査(塗抹鏡検 抗酸菌)"
+	cRec[73] = "喀痰検査(ガフキー号数)"
+	cRec[74] = "便潜血"
+	cRec[75] = "視力(裸眼右)"
+	cRec[76] = "視力(矯正右)"
+	cRec[77] = "視力(裸眼左)"
+	cRec[78] = "視力(矯正左)"
+	cRec[79] = "聴力(右1000Hz)"
+	cRec[80] = "聴力(右4000Hz)"
+	cRec[81] = "聴力(左1000Hz)"
+	cRec[82] = "聴力(左4000Hz)"
+	cRec[83] = "聴力(その他の所見)"
+	cRec[84] = "眼底検査(キースワグナー分類)"
+	cRec[85] = "眼底検査(シェイエ分類:H)"
+	cRec[86] = "眼底検査(シェイエ分類:S)"
+	cRec[87] = "眼底検査(SCOTT分類)"
+	cRec[88] = "眼底検査(その他の所見)"
+	cRec[89] = "眼底検査(実施理由)"
+	cRec[90] = "その他の法定特殊健康診断"
+	cRec[91] = "その他の法定検査"
+	cRec[92] = "その他の検査"
+	cRec[93] = "追加項目1"
+	cRec[94] = "追加項目2"
+	cRec[95] = "追加項目3"
+	cRec[96] = "追加項目4"
+	cRec[97] = "追加項目5"
+	cRec[98] = "追加項目6"
+	cRec[99] = "追加項目7"
+	cRec[100] = "追加項目8"
+	cRec[101] = "追加項目9"
+	cRec[102] = "追加項目10"
+	cRec[103] = "BMI判定"
+	cRec[104] = "内臓脂肪面積判定"
+	cRec[105] = "腹囲判定"
+	cRec[106] = "血圧判定"
+	cRec[107] = "総コレステロール判定"
+	cRec[108] = "中性脂肪判定"
+	cRec[109] = "HDLコレステロール判定"
+	cRec[110] = "LDLコレステロール判定"
+	cRec[111] = "GOT(AST)判定"
+	cRec[112] = "GPT(ALT)判定"
+	cRec[113] = "γ-GT(γ-GTP)判定"
+	cRec[114] = "血清クレアチニン判定"
+	cRec[115] = "血清尿酸判定"
+	cRec[116] = "空腹時血糖判定"
+	cRec[117] = "随時血糖判定"
+	cRec[118] = "HbA1c判定"
+	cRec[119] = "HbA1c（NGSP)判定"
+	cRec[120] = "尿糖判定"
+	cRec[121] = "尿蛋白判定"
+	cRec[122] = "尿潜血判定"
+	cRec[123] = "尿素窒素判定"
+	cRec[124] = "尿ウロビリノーゲン判定"
+	cRec[125] = "ヘマトクリット値判定"
+	cRec[126] = "血色素量(ヘモグロビン値)判定"
+	cRec[127] = "赤血球数判定"
+	cRec[128] = "白血球数判定"
+	cRec[129] = "血小板数判定"
+	cRec[130] = "視力(右)判定"
+	cRec[131] = "視力(左)判定"
+	cRec[132] = "追加項目判定1"
+	cRec[133] = "追加項目判定2"
+	cRec[134] = "追加項目判定3"
+	cRec[135] = "追加項目判定4"
+	cRec[136] = "追加項目判定5"
+	cRec[137] = "追加項目判定6"
+	cRec[138] = "追加項目判定7"
+	cRec[139] = "追加項目判定8"
+	cRec[140] = "追加項目判定9"
+	cRec[141] = "追加項目判定10"
+	cRec[142] = "コメント"
+	cRec[143] = "総合判定"
+	cRec[144] = "受診勧奨区分"
+	cRec[145] = "指導状態"
+	cRec[146] = "再検査区分"
+	cRec[147] = "一次健診日"
+	cRec[148] = "結果通知区分"
+	cRec[149] = "メタボリック判定(血圧リスク)"
+	cRec[150] = "メタボリック判定(血糖リスク)"
+	cRec[151] = "メタボリック判定(脂質リスク)"
+	cRec[152] = "メタボリック判定(リスクカウント)"
+	cRec[153] = "支援レベル(血圧リスク)"
+	cRec[154] = "支援レベル(血糖リスク)"
+	cRec[155] = "支援レベル(脂質リスク)"
+	cRec[156] = "支援レベル(喫煙リスク)"
+	cRec[157] = "支援レベル(リスクカウント)"
+	cRec[158] = "メタボリックシンドローム判定"
+	cRec[159] = "支援レベル"
+	cRec[160] = "医師の診断(判定)"
+	cRec[161] = "健康診断を実施した医師の氏名"
+	cRec[162] = "医師の意見"
+	cRec[163] = "意見を述べた医師の氏名"
+	cRec[164] = "歯科医師による健康診断"
+	cRec[165] = "歯科医師による健康診断を実施した歯科医師の氏名"
+	cRec[166] = "歯科医師の意見"
+	cRec[167] = "意見を述べた歯科医師の氏名"
+	cRec[168] = "備考"
+	cRec[169] = "服薬１_血圧"
+	cRec[170] = "血圧_薬剤"
+	cRec[171] = "血圧_服薬理由"
+	cRec[172] = "服薬２_血糖"
+	cRec[173] = "血糖_薬剤"
+	cRec[174] = "血糖_服薬理由"
+	cRec[175] = "服薬３_脂質"
+	cRec[176] = "脂質_薬剤"
+	cRec[177] = "脂質_服薬理由"
+	cRec[178] = "既往歴１_脳血管"
+	cRec[179] = "既往歴２_心血管"
+	cRec[180] = "既往歴３_腎不全人工透析"
+	cRec[181] = "貧血"
+	cRec[182] = "喫煙"
+	cRec[183] = "２０歳からの体重変化"
+	cRec[184] = "３０分以上の運動習慣"
+	cRec[185] = "歩行又は身体活動"
+	cRec[186] = "歩行速度"
+	cRec[187] = "１年間の体重変化"
+	cRec[188] = "食べ方１_早食い等"
+	cRec[189] = "食べ方２_就寝前"
+	cRec[190] = "食べ方３_夜食間食"
+	cRec[191] = "食習慣"
+	cRec[192] = "飲酒"
+	cRec[193] = "飲酒量"
+	cRec[194] = "睡眠"
+	cRec[195] = "生活習慣の改善"
+	cRec[196] = "保健指導の希望"
+	cRec[197] = "報告対象区分"
+	cRec[198] = "保健指導からの除外"
+	cRec[199] = "取込年月日"
+	cRec[200] = "胸部X線判定"
+	cRec[201] = "胸部判定アルファベット"
+	cRec[202] = "心電図判定アルファベット"
+	cRec[203] = "胸部レントゲン検査"
+	cRec[204] = "胸部レントゲン判定"
+	cRec[205] = "尿糖"
+	cRec[206] = "尿蛋白"
+	cRec[207] = "聴力(右1000Hz)"
+	cRec[208] = "聴力(右4000Hz)"
+	cRec[209] = "聴力(左1000Hz)"
+	cRec[210] = "聴力(左4000Hz)"
+	cRec[211] = "心電図検査"
+	cRec[212] = "心電図判定"
+	writer.Write(cRec)
+
+	// 4行目移行（データ）
+	inRecsMax := len(inRecs)
+	for J := 1; J < inRecsMax; J++ {
+		for I, _ = range cRec {
+			cRec[I] = ""
+		}
+
+		// 0.社員番号
+		cRec[0] = inRecs[J][0]
+
+		// 1.組合コード
+
+		// 2.受診者ID
+		cRec[2] = inRecs[J][1]
+
+		// 3.保険証記号
+		cRec[3] = inRecs[J][2]
+
+		// 4.保険証番号
+		cRec[4] = inRecs[J][3]
+
+		// 5.続柄
+		// 6.枝番
+		// 7.所属コード
+		cRec[7] = inRecs[J][6]
+
+		// 8.所属名称
+		cRec[8] = inRecs[J][7]
+
+		// 9.加入番号
+
+		// 10.扶養番号
+
+		// 11.受診者区分
+
+		// 12.性別
+		cRec[12] = inRecs[J][8]
+
+		// 13.氏名漢字
+		cRec[13] = inRecs[J][9]
+
+		// 14.氏名カナ
+		cRec[14] = string(norm.NFKC.Bytes([]byte(inRecs[J][10])))
+
+		// 15.生年月日
+		cRec[15] = WaToSeireki(inRecs[J][11])
+
+		// 16.実施年度
+		cRec[16] = nendo(inRecs[J][15])
+
+		// 17.年齢
+		cRec[17] = inRecs[J][12]
+
+		// 18.受診日
+		cRec[18] = strings.Replace(inRecs[J][15], "-", "/", -1)
+
+		// 19.健診区分
+		cRec[19] = "事業者健診"
+
+		// 20.医療機関コード
+		cRec[20] = "013-61"
+
+		// 21.医療機関名称
+		cRec[21] = "医療法人社団　松英会"
+
+		// 22.機関コード
+		cRec[22] = "1311131242"
+
+		// 23.機関名称
+		cRec[23] = "医療法人社団　松英会"
+
+		// 24.機関住所
+		cRec[24] = "143-0027 大田区中馬込1-5-8"
+
+		// 25.受付NO
+		cRec[25] = inRecs[J][16]
+
+		// 26.身長
+		cRec[26] = inRecs[J][17]
+
+		// 27.体重
+		cRec[27] = inRecs[J][18]
+
+		// 28.BMI
+		cRec[28] = inRecs[J][19]
+
+		// 29.内臓脂肪面積
+
+		// 30.腹囲
+		cRec[30] = inRecs[J][20]
+
+		// 31.業務歴
+
+		// 32.既往歴
+		kiou := ""
+		for k := 0; k < 10; k++ {
+			kp := 21 + (k * 2)
+			kiouB := kiouSet(inRecs[J][kp])
+			kiouT := kiouSet(inRecs[J][kp+1])
+			if kiouB != "" {
+				if utf8.RuneCountInString(kiou+" "+kiouB+kiouT) > 25 {
+					if utf8.RuneCountInString(kiou+" "+kiouB) > 25 {
+						break
+					} else {
+						if kiou == "" {
+							kiou = kiouB
+						} else {
+							kiou = kiou + " " + kiouB
+						}
+					}
+				} else {
+					if kiou == "" {
+						kiou = kiouB + kiouT
+					} else {
+						kiou = kiou + " " + kiouB + kiouT
+					}
+				}
+			}
+		}
+
+		cRec[32] = kiou
+
+		// 33.自覚症状
+		cRec[33] = syoken(inRecs[J][41] + " " + inRecs[J][42] + " " + inRecs[J][43])
+
+		// 34.他覚症状
+		cRec[34] = syoken(inRecs[J][44] + " " + inRecs[J][45] + " " + inRecs[J][46])
+
+		// 35.収縮期血圧(その他)
+
+		// 36.収縮期血圧(２回目)
+		cRec[36] = inRecs[J][47]
+
+		// 37.収縮期血圧(１回目)
+		cRec[37] = inRecs[J][48]
+
+		// 38.拡張期血圧(その他)
+
+		// 39.拡張期血圧(２回目)
+		cRec[39] = inRecs[J][49]
+
+		// 40.拡張期血圧(１回目)
+		cRec[40] = inRecs[J][50]
+
+		// 41.採血時間
+
+		// 42.総コレステロール
+		cRec[42] = inRecs[J][53]
+
+		// 43.中性脂肪
+		cRec[43] = inRecs[J][54]
+
+		// 44.HDLコレステロール
+		cRec[44] = inRecs[J][55]
+
+		// 45.LDLコレステロール
+		cRec[45] = inRecs[J][56]
+
+		// 46.GOT(AST)
+		cRec[46] = inRecs[J][57]
+
+		// 47.GPT(ALT)
+		cRec[47] = inRecs[J][58]
+
+		// 48.γ-GT(γ-GTP)
+		cRec[48] = inRecs[J][59]
+
+		// 49.血清クレアチニン
+		cRec[49] = inRecs[J][60]
+
+		// 50.血清尿酸
+		cRec[50] = inRecs[J][61]
+
+		// 51.空腹時血糖
+		// 52.随時血糖
+		if inRecs[J][51] == "とった" {
+			cRec[52] = inRecs[J][62]
+		} else {
+			cRec[51] = inRecs[J][62]
+		}
+
+		// 53.HbA1c
+		// 54.HbA1c(NGSP)
+		cRec[54] = inRecs[J][63]
+
+		// 55.尿糖
+		cRec[55] = inRecs[J][64]
+
+		// 56.尿蛋白
+		cRec[56] = inRecs[J][65]
+
+		// 57.尿潜血
+		cRec[57] = inRecs[J][66]
+
+		// 58.尿素窒素
+		cRec[58] = inRecs[J][67]
+
+		// 59.尿ウロビリノーゲン
+		cRec[59] = inRecs[J][68]
+
+		// 60.ヘマトクリット値
+		cRec[60] = inRecs[J][69]
+
+		// 61.血色素量(ヘモグロビン値)
+		cRec[61] = inRecs[J][70]
+
+		// 62.赤血球数
+		cRec[62] = inRecs[J][71]
+
+		// 63.貧血検査実施理由
+
+		// 64.白血球数
+		cRec[64] = inRecs[J][72]
+
+		// 65.血小板数
+		cRec[65] = inRecs[J][73]
+
+		// 66.血清アミラーゼ
+		cRec[66] = inRecs[J][74]
+
+		// 67.心電図(所見)
+		cRec[67] = syoken(inRecs[J][76] + " " + inRecs[J][77] + " " + inRecs[J][78] + " " + inRecs[J][79])
+
+		// 68.心電図(実施理由)
+
+		// 69.胸部X線検査(所見)
+		cRec[69] = syoken(inRecs[J][81] + " " + inRecs[J][82] + " " + inRecs[J][83])
+
+		// 70.胸部X線検査(撮影年月日)
+		if inRecs[J][80] != "" {
+			cRec[70] = strings.Replace(inRecs[J][15], "-", "/", -1)
+		}
+
+		// 71.喀痰検査(塗抹鏡検 一般細菌)(所見)
+
+		// 72.喀痰検査(塗抹鏡検 抗酸菌)
+
+		// 73.喀痰検査(ガフキー号数)
+
+		// 74.便潜血
+		cRec[74] = inRecs[J][84]
+
+		// 75.視力(裸眼右)
+		cRec[75] = eye(inRecs[J][85])
+
+		// 76.視力(矯正右)
+		cRec[76] = eye(inRecs[J][86])
+
+		// 77.視力(裸眼左)
+		cRec[77] = eye(inRecs[J][87])
+
+		// 78.視力(矯正左)
+		cRec[78] = eye(inRecs[J][88])
+
+		// 79.聴力(右1000Hz)
+		cRec[79] = syokenumu(inRecs[J][97])
+
+		// 80.聴力(右4000Hz)
+		cRec[80] = syokenumu4k(inRecs[J][99], inRecs[J][101])
+
+		// 81.聴力(左1000Hz)
+		cRec[81] = syokenumu(inRecs[J][98])
+
+		// 82.聴力(左4000Hz)
+		cRec[82] = syokenumu4k(inRecs[J][100], inRecs[J][102])
+
+		// 83.聴力(その他の所見)
+
+		// 84.眼底検査(キースワグナー分類)
+
+		// 85.眼底検査(シェイエ分類:H)
+
+		// 86.眼底検査(シェイエ分類:S)
+
+		// 87.眼底検査(SCOTT分類)
+
+		// 88.眼底検査(その他の所見)
+
+		// 89.眼底検査(実施理由)
+
+		// 90.その他の法定特殊健康診断
+
+		// 91.その他の法定検査
+
+		// 92.その他の検査
+
+		// 93.追加項目1
+
+		// 94.追加項目2
+
+		// 95.追加項目3
+
+		// 96.追加項目4
+
+		// 97.追加項目5
+
+		// 98.追加項目6
+
+		// 99.追加項目7
+
+		// 100.追加項目8
+
+		// 101.追加項目9
+
+		// 102.追加項目10
+
+		// 103.BMI判定
+		cRec[103] = inRecs[J][103]
+
+		// 104.内臓脂肪面積判定
+
+		// 105.腹囲判定
+		cRec[105] = inRecs[J][104]
+
+		// 106.血圧判定
+		cRec[106] = string(norm.NFKC.Bytes([]byte(inRecs[J][105])))
+
+		// 107.総コレステロール判定
+		cRec[107] = inRecs[J][106]
+
+		// 108.中性脂肪判定
+		cRec[108] = inRecs[J][107]
+
+		// 109.HDLコレステロール判定
+		cRec[109] = inRecs[J][108]
+
+		// 110.LDLコレステロール判定
+		cRec[110] = inRecs[J][109]
+
+		// 111.GOT(AST)判定
+		cRec[111] = inRecs[J][110]
+
+		// 112.GPT(ALT)判定
+		cRec[112] = inRecs[J][111]
+
+		// 113.γ-GT(γ-GTP)判定
+		cRec[113] = inRecs[J][112]
+
+		// 114.血清クレアチニン判定
+		cRec[114] = inRecs[J][113]
+
+		// 115.血清尿酸判定
+		cRec[115] = inRecs[J][114]
+
+		// 116.空腹時血糖判定
+		// 117.随時血糖判定
+		if inRecs[J][51] == "とった" {
+			cRec[117] = inRecs[J][115]
+		} else {
+			cRec[116] = inRecs[J][115]
+		}
+
+		// 118.HbA1c判定
+
+		// 119.HbA1c（NGSP)判定
+		cRec[119] = inRecs[J][116]
+
+		// 120.尿糖判定
+		cRec[120] = inRecs[J][117]
+
+		// 121.尿蛋白判定
+		cRec[121] = inRecs[J][118]
+
+		// 122.尿潜血判定
+		cRec[122] = inRecs[J][119]
+
+		// 123.尿素窒素判定
+		cRec[123] = inRecs[J][120]
+
+		// 124.尿ウロビリノーゲン判定
+		cRec[124] = inRecs[J][121]
+
+		// 125.ヘマトクリット値判定
+		cRec[125] = inRecs[J][122]
+
+		// 126.血色素量(ヘモグロビン値)判定
+		cRec[126] = inRecs[J][123]
+
+		// 127.赤血球数判定
+		cRec[127] = inRecs[J][124]
+
+		// 128.白血球数判定
+		cRec[128] = inRecs[J][125]
+
+		// 129.血小板数判定
+		cRec[129] = inRecs[J][126]
+
+		// 130.視力(右)判定
+		cRec[130] = eyeHantei(inRecs[J][127], inRecs[J][128])
+
+		// 131.視力(左)判定
+		cRec[131] = eyeHantei(inRecs[J][129], inRecs[J][130])
+
+		// 132.追加項目判定1
+
+		// 133.追加項目判定2
+
+		// 134.追加項目判定3
+
+		// 135.追加項目判定4
+
+		// 136.追加項目判定5
+
+		// 137.追加項目判定6
+
+		// 138.追加項目判定7
+
+		// 139.追加項目判定8
+
+		// 140.追加項目判定9
+
+		// 141.追加項目判定10
+
+		// 142.コメント
+
+		// 143.総合判定
+		cRec[143] = inRecs[J][131]
+
+		// 144.受診勧奨区分
+
+		// 145.指導状態
+
+		// 146.再検査区分
+
+		// 147.一次健診日
+
+		// 148.結果通知区分
+
+		// 149.メタボリック判定(血圧リスク)
+
+		// 150.メタボリック判定(血糖リスク)
+
+		// 151.メタボリック判定(脂質リスク)
+
+		// 152.メタボリック判定(リスクカウント)
+
+		// 153.支援レベル(血圧リスク)
+
+		// 154.支援レベル(血糖リスク)
+
+		// 155.支援レベル(脂質リスク)
+
+		// 156.支援レベル(喫煙リスク)
+
+		// 157.支援レベル(リスクカウント)
+
+		// 158.メタボリックシンドローム判定
+		cRec[158] = inRecs[J][133]
+
+		// 159.支援レベル
+		cRec[159] = inRecs[J][134]
+
+		// 160.医師の診断(判定)
+		cRec[160] = inRecs[J][132]
+
+		// 161.健康診断を実施した医師の氏名
+		cRec[161] = "寺門　節雄"
+
+		// 162.医師の意見
+
+		// 163.意見を述べた医師の氏名
+
+		// 164.歯科医師による健康診断
+
+		// 165.歯科医師による健康診断を実施した歯科医師の氏名
+
+		// 166.歯科医師の意見
+
+		// 167.意見を述べた歯科医師の氏名
+
+		// 168.備考
+
+		// 169.服薬１_血圧
+		cRec[169] = inRecs[J][135]
+
+		// 170.血圧_薬剤
+
+		// 171.血圧_服薬理由
+
+		// 172.服薬２_血糖
+		cRec[172] = inRecs[J][136]
+
+		// 173.血糖_薬剤
+
+		// 174.血糖_服薬理由
+
+		// 175.服薬３_脂質
+		cRec[175] = inRecs[J][137]
+
+		// 176.脂質_薬剤
+
+		// 177.脂質_服薬理由
+
+		// 178.既往歴１_脳血管
+		cRec[178] = inRecs[J][138]
+
+		// 179.既往歴２_心血管
+		cRec[179] = inRecs[J][139]
+
+		// 180.既往歴３_腎不全人工透析
+		cRec[180] = inRecs[J][140]
+
+		// 181.貧血
+		cRec[181] = inRecs[J][141]
+
+		// 182.喫煙
+		cRec[182] = inRecs[J][142]
+
+		// 183.２０歳からの体重変化
+		cRec[183] = inRecs[J][143]
+
+		// 184.３０分以上の運動習慣
+		cRec[184] = inRecs[J][144]
+
+		// 185.歩行又は身体活動
+		cRec[185] = inRecs[J][145]
+
+		// 186.歩行速度
+		cRec[186] = inRecs[J][146]
+
+		// 187.１年間の体重変化
+		cRec[187] = inRecs[J][147]
+
+		// 188.食べ方１_早食い等
+		cRec[188] = inRecs[J][148]
+
+		// 189.食べ方２_就寝前
+		cRec[189] = inRecs[J][149]
+
+		// 190.食べ方３_夜食間食
+		cRec[190] = inRecs[J][150]
+
+		// 191.食習慣
+		cRec[191] = inRecs[J][151]
+
+		// 192.飲酒
+		cRec[192] = inRecs[J][152]
+
+		// 193.飲酒量
+		cRec[193] = inRecs[J][153]
+
+		// 194.睡眠
+		cRec[194] = inRecs[J][154]
+
+		// 195.生活習慣の改善
+		cRec[195] = inRecs[J][155]
+
+		// 196.保健指導の希望
+		cRec[196] = inRecs[J][156]
+
+		// 197.報告対象区分
+
+		// 198.保健指導からの除外
+
+		// 199.取込年月日
+
+		// 200.胸部X線判定
+		cRec[200] = string(norm.NFKC.Bytes([]byte(inRecs[J][80])))
+
+		// 201.胸部判定アルファベット
+		cRec[201] = string(norm.NFKC.Bytes([]byte(inRecs[J][80])))
+
+		// 202.心電図判定アルファベット
+		cRec[202] = string(norm.NFKC.Bytes([]byte(inRecs[J][75])))
+
+		// 203.胸部レントゲン検査
+		cRec[203] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][80]))))
+
+		// 204.胸部レントゲン判定
+		cRec[204] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][80]))))
+
+		// 205.尿糖
+		cRec[205] = nyou(inRecs[J][64])
+
+		// 206.尿蛋白
+		cRec[206] = nyou(inRecs[J][65])
+
+		// 207.聴力(右1000Hz)
+		cRec[207] = syokenumuCode(syokenumu(inRecs[J][97]))
+
+		// 208.聴力(右4000Hz)
+		cRec[208] = syokenumuCode(syokenumu4k(inRecs[J][99], inRecs[J][101]))
+
+		// 209.聴力(左1000Hz)
+		cRec[209] = syokenumuCode(syokenumu(inRecs[J][98]))
+
+		// 210.聴力(左4000Hz)
+		cRec[210] = syokenumuCode(syokenumu4k(inRecs[J][100], inRecs[J][102]))
+
+		// 211.心電図検査
+		cRec[211] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][75]))))
+
+		// 212.心電図判定
+		cRec[212] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][75]))))
+
+		writer.Write(cRec)
+	}
+
 	writer.Flush()
-	log.Print("Finesh !\r\n")
 
 }
 
@@ -902,29 +1084,88 @@ func WaToSeireki(nen string) string {
 		if yi == 0 {
 			return "err"
 		} else {
-			return fmt.Sprint(yi) + m + d
+			return fmt.Sprint(yi) + "/" + m + "/" + d
 		}
 	}
 }
 
-func Sei(s string) string {
-
-	switch s {
-	case "男":
-		s = "1"
-	case "女":
-		s = "2"
-	case "性別":
-		s = "性別"
-	default:
-		s = "err"
+func nendo(JDay string) string {
+	var nen int
+	t, _ := time.Parse("2006-01-02", JDay)
+	if t.Month() > 3 {
+		nen = t.Year()
+	} else {
+		nen = t.Year() - 1
 	}
+
+	return strconv.Itoa(nen)
+}
+
+func kiouSet(s string) string {
+	var spos, epos int
+	//全角記号を半角へ
+	s = strings.Replace(s, "（", "(", -1)
+	s = strings.Replace(s, "）", ")", -1)
+	s = strings.Replace(s, "　", " ", -1)
+
+	// ()でくくった文字は削除
+	for {
+		spos = strings.LastIndex(s, "(")
+		epos = strings.LastIndex(s, ")")
+
+		if epos == -1 {
+			break
+		} else if spos == -1 {
+			break
+		} else {
+			//log.Print(s + ":epos→" + fmt.Sprint(epos) + " len→" + fmt.Sprint(len(s)) + "\r\n")
+			s = s[:spos] + s[epos+1:]
+		}
+	}
+
+	// 余分なスペースを削除
+	s = dsTrim(s)
+	s = strings.Trim(s, " ")
+
 	return s
 }
 
-func Nyou(s string) string {
+func dsTrim(s string) string {
+	for {
+		if strings.Contains(s, "  ") {
+			s = strings.Replace(s, "  ", " ", -1)
+		} else {
+			return s
+		}
+	}
+}
+
+func cutStrings(s string, maxLen int) string {
+	s = string([]rune(s)[:maxLen])
+	return s
+}
+
+func syoken(s string) string {
+	s = strings.Replace(s, "　", " ", -1)
+	s = strings.Trim(s, " ")
+
+	for {
+		if utf8.RuneCountInString(s) > 25 {
+			pos := strings.LastIndex(s, " ")
+			s = s[:pos]
+		} else {
+			break
+		}
+	}
+
+	return s
+}
+
+func nyou(s string) string {
 
 	switch s {
+	case "":
+		s = ""
 	case "－":
 		s = "1"
 	case "+-":
@@ -936,268 +1177,142 @@ func Nyou(s string) string {
 	case "3+":
 		s = "5"
 	case "4+":
-		s = "5"
+		s = "6"
 	case "5+":
-		s = "5"
+		s = "6"
 	default:
 		s = "err"
 	}
 	return s
 }
 
-func Syokenumu(s string) string {
-
-	switch s {
-	case "Ａ":
-		s = "2"
-	case "Ｂ":
-		s = "1"
-	case "Ｃ":
-		s = "1"
-	case "Ｄ":
-		s = "1"
-	case "Ｅ":
-		s = "1"
-	case "Ｆ":
-		s = "1"
-	case "Ｇ":
-		s = "1"
-	default:
-		s = "err"
+func eye(s string) string {
+	if s == "0.1↓" {
+		s = "0.0"
 	}
 	return s
 }
 
-func KwConv(s string) string {
+func syokenumu(s string) string {
 
 	switch s {
 	case "":
 		s = ""
-	case "０":
-		s = "1"
-	case "Ⅰ":
-		s = "2"
-	case "Ⅱ":
-		s = "3"
-	case "Ⅲ":
-		s = "5"
-	case "Ⅳ":
-		s = "6"
-	case "Ⅴ":
-		s = "6"
-	case "Ⅱａ":
-		s = "3"
-	case "Ⅱｂ":
-		s = "4"
-	case "Ⅲａ":
-		s = "5"
-	case "Ⅲｂ":
-		s = "5"
-	case "Ⅰａ":
-		s = "2"
-	case "Ⅰｂ":
-		s = "2"
+	case "A":
+		s = "所見なし"
+	case "B":
+		s = "所見あり"
+	case "C":
+		s = "所見あり"
+	case "D":
+		s = "所見あり"
+	case "E":
+		s = "所見あり"
+	case "F":
+		s = "所見あり"
+	case "G":
+		s = "所見あり"
 	default:
 		s = "err"
 	}
 	return s
 }
 
-func HyScConv(s string) string {
+func syokenumu4k(s1, s2 string) string {
+	var s string
+	s1s := syokenumu(s1)
+	s2s := syokenumu(s2)
 
-	switch s {
-	case "":
-		s = ""
-	case "０":
-		s = "1"
-	case "１":
-		s = "2"
-	case "２":
-		s = "3"
-	case "３":
-		s = "4"
-	case "４":
-		s = "5"
-	default:
-		s = "err"
+	s = s1s
+	if s == "" {
+		s = s2s
 	}
+
 	return s
 }
 
-func ScottConv(s string) string {
+func syokenumuCode(s string) string {
+
+	if s == "所見なし" {
+		return "1"
+	} else if s == "所見あり" {
+		return "2"
+	} else {
+		return s
+	}
+
+}
+
+func eyeHantei(s1, s2 string) string {
+	var s string
+
+	switch s1 {
+	case "":
+		s = s2
+	case "A":
+		s = "A"
+	case "B":
+		if s2 == "A" {
+			s = s2
+		} else {
+			s = "B"
+		}
+	case "C":
+		if s2 == "A" || s2 == "B" {
+			s = s2
+		} else {
+			s = "C"
+		}
+	case "D":
+		if s2 == "A" || s2 == "B" || s2 == "C" {
+			s = s2
+		} else {
+			s = "D"
+		}
+	case "E":
+		if s2 == "A" || s2 == "B" || s2 == "C" || s2 == "D" {
+			s = s2
+		} else {
+			s = "E"
+		}
+	case "F":
+		if s2 == "A" || s2 == "B" || s2 == "C" || s2 == "D" || s2 == "E" {
+			s = s2
+		} else {
+			s = "F"
+		}
+	case "G":
+		if s2 == "A" || s2 == "B" || s2 == "C" || s2 == "D" || s2 == "E" || s2 == "F" {
+			s = s2
+		} else {
+			s = "G"
+		}
+	default:
+		s = "err"
+	}
+
+	return s
+}
+
+func hanteiCode(s string) string {
 
 	switch s {
 	case "":
 		s = ""
-	case "０":
-		s = ""
-	case "Ⅰ":
+	case "A":
 		s = "1"
-	case "Ⅱ":
+	case "B":
+		s = "2"
+	case "C":
 		s = "3"
-	case "Ⅲ":
+	case "D":
 		s = "4"
-	case "Ⅳ":
+	case "E":
+		s = "5"
+	case "F":
 		s = "6"
-	case "Ⅴ":
+	case "G":
 		s = "7"
-	case "Ⅵ":
-		s = "9"
-	case "Ⅱａ":
-		s = "3"
-	case "Ⅱｂ":
-		s = "3"
-	case "Ⅲａ":
-		s = "4"
-	case "Ⅲｂ":
-		s = "5"
-	case "Ⅰａ":
-		s = "1"
-	case "Ⅰｂ":
-		s = "2"
-	default:
-		s = "err"
-	}
-	return s
-}
-
-func KiouJoin(b, a, t string) string {
-
-	s := ""
-
-	if a != "" {
-		a = a + "才"
-	}
-
-	if b != "" {
-		s = strings.Trim(strings.Replace(b+" "+a+" "+t, "  ", " ", -1), " ")
-	}
-
-	return s
-}
-
-func HokenConv(s string) string {
-
-	switch s {
-	case "":
-		s = ""
-	case "積極的支援レベル":
-		s = "1"
-	case "動機づけ支援レベル":
-		s = "2"
-	case "情報提供レベル":
-		s = "3"
-	case "判定不能":
-		s = "4"
-	default:
-		s = "err"
-	}
-
-	return s
-}
-
-func MetaboConv(s string) string {
-
-	switch s {
-	case "":
-		s = ""
-	case "基準該当":
-		s = "1"
-	case "予備群該当":
-		s = "2"
-	case "非該当":
-		s = "3"
-	case "判定不能":
-		s = "4"
-	default:
-		s = "err"
-	}
-	return s
-}
-
-func YesNo(s string) string {
-
-	switch s {
-	case "":
-		s = ""
-	case "はい":
-		s = "1"
-	case "いいえ":
-		s = "2"
-	default:
-		s = "err"
-	}
-	return s
-}
-
-func Eat(s string) string {
-
-	switch s {
-	case "":
-		s = ""
-	case "速い":
-		s = "1"
-	case "普通":
-		s = "2"
-	case "遅い":
-		s = "3"
-	default:
-		s = "err"
-	}
-	return s
-}
-
-func Sake(s string) string {
-
-	switch s {
-	case "":
-		s = ""
-	case "毎日":
-		s = "1"
-	case "時々":
-		s = "2"
-	case "飲まない":
-		s = "3"
-	default:
-		s = "err"
-	}
-	return s
-}
-
-func Sakeryo(s string) string {
-
-	switch s {
-	case "":
-		s = ""
-	case "１合未満":
-		s = "1"
-	case "１～２合未満":
-		s = "2"
-	case "２～３合未満":
-		s = "3"
-	case "３合以上":
-		s = "4"
-	default:
-		s = "err"
-	}
-	return s
-}
-
-func Seikatsu(s string) string {
-
-	switch s {
-	case "":
-		s = ""
-	case "しない":
-		s = "1"
-	case "思う":
-		s = "2"
-	case "始めた":
-		s = "3"
-	case "６ヶ月経過":
-		s = "4"
-	case "６ヶ月以上":
-		s = "5"
 	default:
 		s = "err"
 	}
