@@ -13,6 +13,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/tealeg/xlsx"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
@@ -105,7 +106,7 @@ func coSurvey(records [][]string) [][]string {
 	for j, _ := range companys {
 		if companys[j][2] != "0" {
 			outCompanys = append(outCompanys, companys[j])
-			log.Print(companys[j][2] + " " + companys[j][0] + ":" + companys[j][1] + "\r\n")
+			// log.Print(companys[j][2] + " " + companys[j][0] + ":" + companys[j][1] + "\r\n")
 		}
 	}
 
@@ -128,6 +129,13 @@ func dirCreate(path string) string {
 }
 
 func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
+	var excelFile *xlsx.File
+	var sheet *xlsx.Sheet
+	var err error
+	var r int
+	var c int
+	var cell string
+
 	recLen := 213 //出力するレコードの項目数
 	cRec := make([]string, recLen)
 	var I int
@@ -137,13 +145,21 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 	//会社毎に健診データファイルを作成する
 	for _, coRec := range coRecs {
 
-		outfile, err := os.Create(filename + coRec[1] + "健診データ" + day.Format("20060102") + ".txt")
-		failOnError(err)
-		defer outfile.Close()
+		/*
+			outfile, err := os.Create(filename + coRec[1] + "健診データ" + day.Format("20060102") + ".txt")
+			failOnError(err)
+			defer outfile.Close()
 
-		writer := csv.NewWriter(transform.NewWriter(outfile, japanese.ShiftJIS.NewEncoder()))
-		writer.Comma = '\t'
-		writer.UseCRLF = true
+			writer := csv.NewWriter(transform.NewWriter(outfile, japanese.ShiftJIS.NewEncoder()))
+			writer.Comma = '\t'
+			writer.UseCRLF = true
+		*/
+
+		excelName := filename + coRec[1] + "健診データ" + day.Format("20060102") + ".xlsx"
+		excelFile = xlsx.NewFile()
+		xlsx.SetDefaultFont(11, "ＭＳ Ｐゴシック")
+		sheet, err = excelFile.AddSheet("データ")
+		failOnError(err)
 
 		// 1行目（タイトル）
 		for I, _ = range cRec {
@@ -173,6 +189,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[47] = "knk_kenkork_kensa.kensa_val_034"
 		cRec[48] = "knk_kenkork_kensa.kensa_val_035"
 		cRec[51] = "knk_kenkork_kensa.kensa_val_041"
+		cRec[52] = "knk_kenkork_kensa.kensa_val_079"
 		cRec[54] = "knk_kenkork_kensa.kensa_val_042"
 		cRec[61] = "knk_kenkork_kensa.kensa_val_031"
 		cRec[62] = "knk_kenkork_kensa.kensa_val_030"
@@ -215,7 +232,10 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[210] = "knk_kenkork_kensa.kensa_val_019"
 		cRec[211] = "knk_kenkork_kensa.kensa_val_046"
 		cRec[212] = "knk_kenkork_kensa.hantei_val_046"
-		writer.Write(cRec)
+		//writer.Write(cRec)
+		for c, cell = range cRec {
+			sheet.Cell(0, c).Value = cell
+		}
 
 		// 2行目（タイトル）
 		for I, _ = range cRec {
@@ -245,6 +265,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[47] = "検査コード034_医療機関側検査値"
 		cRec[48] = "検査コード035_医療機関側検査値"
 		cRec[51] = "検査コード041_医療機関側検査値"
+		cRec[52] = "検査コード079_医療機関側検査値"
 		cRec[54] = "検査コード042_医療機関側検査値"
 		cRec[61] = "検査コード031_医療機関側検査値"
 		cRec[62] = "検査コード030_医療機関側判定結果"
@@ -287,8 +308,10 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[210] = "検査コード019_医療機関側検査値"
 		cRec[211] = "検査コード046_医療機関側検査値"
 		cRec[212] = "検査コード046_医療機関側検査値"
-		writer.Write(cRec)
-
+		//writer.Write(cRec)
+		for c, cell = range cRec {
+			sheet.Cell(1, c).Value = cell
+		}
 		// 3行目（タイトル）
 		for I, _ = range cRec {
 			cRec[I] = ""
@@ -507,9 +530,13 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[210] = "聴力(左4000Hz)"
 		cRec[211] = "心電図検査"
 		cRec[212] = "心電図判定"
-		writer.Write(cRec)
+		//writer.Write(cRec)
+		for c, cell = range cRec {
+			sheet.Cell(2, c).Value = cell
+		}
 
 		// 4行目移行（データ）
+		r = 3
 		inRecsMax := len(inRecs)
 		for J := 1; J < inRecsMax; J++ {
 			for I, _ = range cRec {
@@ -685,7 +712,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 
 				// 51.空腹時血糖
 				// 52.随時血糖
-				if inRecs[J][51] == "とった" {
+				if syokugo(inRecs[J][51], inRecs[J][52]) {
 					cRec[52] = inRecs[J][62]
 				} else {
 					cRec[51] = inRecs[J][62]
@@ -856,8 +883,8 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 
 				// 116.空腹時血糖判定
 				// 117.随時血糖判定
-				if inRecs[J][51] == "とった" {
-					cRec[117] = inRecs[J][115]
+				if syokugo(inRecs[J][51], inRecs[J][52]) {
+					cRec[117] = toH(inRecs[J][62])
 				} else {
 					cRec[116] = inRecs[J][115]
 				}
@@ -1105,16 +1132,26 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				// 212.心電図判定
 				cRec[212] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][75]))))
 
-				writer.Write(cRec)
+				//writer.Write(cRec)
+				for c, cell = range cRec {
+					sheet.Cell(r, c).Value = cell
+				}
+				r++
 			}
 		}
 
-		writer.Flush()
+		//writer.Flush()
+		err = excelFile.Save(excelName)
+		failOnError(err)
 	}
 
 }
 
 func meiboCreate(filename string, inRecs [][]string, coRecs [][]string) {
+	var excelFile *xlsx.File
+	var sheet *xlsx.Sheet
+	var err error
+
 	recLen := 14 //出力するレコードの項目数
 	jRec := make([]string, recLen)
 
@@ -1123,16 +1160,25 @@ func meiboCreate(filename string, inRecs [][]string, coRecs [][]string) {
 	//会社毎に受診者名簿を作成する
 	for _, coRec := range coRecs {
 
-		outfile, err := os.Create(filename + coRec[1] + "受診者名簿" + day.Format("20060102") + ".txt")
+		/*
+			outfile, err := os.Create(filename + coRec[1] + "受診者名簿" + day.Format("20060102") + ".txt")
+			failOnError(err)
+			defer outfile.Close()
+
+			writer := csv.NewWriter(transform.NewWriter(outfile, japanese.ShiftJIS.NewEncoder()))
+			writer.Comma = '\t'
+			writer.UseCRLF = true
+		*/
+
+		excelName := filename + coRec[1] + "受診者名簿" + day.Format("20060102") + ".xlsx"
+		excelFile = xlsx.NewFile()
+		xlsx.SetDefaultFont(11, "ＭＳ Ｐゴシック")
+		sheet, err = excelFile.AddSheet("データ")
 		failOnError(err)
-		defer outfile.Close()
 
-		writer := csv.NewWriter(transform.NewWriter(outfile, japanese.ShiftJIS.NewEncoder()))
-		writer.Comma = '\t'
-		writer.UseCRLF = true
-
+		r := 0
 		for _, inRec := range inRecs {
-			if (coRec[0] == inRec[4] || inRec[4] == "所属cd１") {
+			if coRec[0] == inRec[4] || inRec[4] == "所属cd１" {
 				jRec[0] = inRec[4]
 				jRec[1] = inRec[5]
 				jRec[2] = inRec[6]
@@ -1147,12 +1193,18 @@ func meiboCreate(filename string, inRecs [][]string, coRecs [][]string) {
 				jRec[11] = inRec[12]
 				jRec[12] = inRec[15]
 				jRec[13] = inRec[16]
-				writer.Write(jRec)
+				//writer.Write(jRec)
+				for c, cell := range jRec {
+					sheet.Cell(r, c).Value = cell
+				}
+				r++
 			}
 
 		}
 
-		writer.Flush()
+		//writer.Flush()
+		err = excelFile.Save(excelName)
+		failOnError(err)
 	}
 
 }
@@ -1417,4 +1469,39 @@ func hanteiCode(s string) string {
 		s = "err"
 	}
 	return s
+}
+
+func toH(s string) string {
+
+	v := ""
+	i, _ := strconv.Atoi(s)
+	if s == "" {
+		v = ""
+	} else if i <= 59 {
+		v = "E"
+	} else if (i >= 60) && (i <= 69) {
+		v = "C"
+	} else if (i >= 70) && (i <= 109) {
+		v = "A"
+	} else if (i >= 110) && (i <= 139) {
+		v = "B"
+	} else if (i >= 140) && (i <= 199) {
+		v = "E"
+	} else if i >= 200 {
+		v = "F"
+	}
+
+	return v
+
+}
+
+func syokugo(t, h string) bool {
+	hh, _ := strconv.ParseFloat(h, 32)
+
+	if (t == "とった") && (hh <= 2.0) {
+		return true
+	} else {
+		return false
+	}
+
 }
