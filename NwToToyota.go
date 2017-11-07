@@ -546,6 +546,9 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 
 			if inRecs[J][4] == coRec[0] {
 				// 0.社員番号
+				if len(inRecs[J][0]) != 10 {
+					log.Printf("社員番号が10桁ではありません:%v\r\n", inRecs[J][0])
+				}
 				cRec[0] = inRecs[J][0]
 
 				// 1.組合コード
