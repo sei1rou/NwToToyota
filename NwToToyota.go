@@ -82,14 +82,13 @@ func readfile(filename string) [][]string {
 }
 
 func coSurvey(records [][]string) [][]string {
-	companys := [][]string{{"2000100100000001", "東京トヨペット株式会社", "0"},
-		{"2000100100000002", "ネッツトヨタ東京株式会社", "0"},
-		{"2000100100000003", "ＤＵＯ東京株式会社", "0"},
-		{"2000100100000004", "トヨタアドミニスタ株式会社", "0"},
-		{"2000100100000005", "東京トヨタ自動車株式会社", "0"},
-		{"2000100100000911", "株式会社　トヨテック", "0"},
+	companys := [][]string{{"2000100100000001", "トヨタ東京販売ホールディングス（株）", "0"},
+		{"2000100100000002", "東京トヨタ自動車（株）", "0"},
+		{"2000100100000003", "東京トヨペット（株）", "0"},
+		{"2000100100000006", "ネッツトヨタ東京（株）", "0"},
+		{"2000100100000005", "（株）トヨテック", "0"},
+		{"2000100100000011", "東京トヨタカーライフサービス（株）", "0"},
 		{"2000100100000991", "株式会社　センチュリーサービス", "0"},
-		{"2000100100000992", "東京トヨタカーライフサービス㈱", "0"},
 	}
 
 	coRecMax := len(records)
@@ -137,7 +136,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 	var c int
 	var cell string
 
-	recLen := 213 //出力するレコードの項目数
+	recLen := 221 //出力するレコードの項目数
 	cRec := make([]string, recLen)
 	var I int
 
@@ -186,53 +185,56 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[43] = "knk_kenkork_kensa.kensa_val_039"
 		cRec[44] = "knk_kenkork_kensa.kensa_val_038"
 		cRec[45] = "knk_kenkork_kensa.kensa_val_037"
-		cRec[46] = "knk_kenkork_kensa.kensa_val_033"
-		cRec[47] = "knk_kenkork_kensa.kensa_val_034"
-		cRec[48] = "knk_kenkork_kensa.kensa_val_035"
-		cRec[51] = "knk_kenkork_kensa.kensa_val_041"
-		cRec[52] = "knk_kenkork_kensa.kensa_val_079"
-		cRec[54] = "knk_kenkork_kensa.kensa_val_042"
-		cRec[61] = "knk_kenkork_kensa.kensa_val_031"
-		cRec[62] = "knk_kenkork_kensa.kensa_val_030"
-		cRec[67] = "knk_kenkork_kensa.kensa_val_047"
-		cRec[69] = "knk_kenkork_kensa.kensa_val_021"
-		cRec[75] = "knk_kenkork_kensa.kensa_val_010"
-		cRec[76] = "knk_kenkork_kensa.kensa_val_011"
-		cRec[77] = "knk_kenkork_kensa.kensa_val_012"
-		cRec[78] = "knk_kenkork_kensa.kensa_val_013"
-		cRec[161] = "knk_kenkork_kensa.kensa_val_072"
-		cRec[169] = "knk_kenkork_kensa.kensa_val_049"
-		cRec[172] = "knk_kenkork_kensa.kensa_val_050"
-		cRec[175] = "knk_kenkork_kensa.kensa_val_051"
-		cRec[178] = "knk_kenkork_kensa.kensa_val_052"
-		cRec[179] = "knk_kenkork_kensa.kensa_val_053"
-		cRec[180] = "knk_kenkork_kensa.kensa_val_054"
-		cRec[181] = "knk_kenkork_kensa.kensa_val_055"
-		cRec[182] = "knk_kenkork_kensa.kensa_val_056"
-		cRec[183] = "knk_kenkork_kensa.kensa_val_057"
-		cRec[184] = "knk_kenkork_kensa.kensa_val_058"
-		cRec[185] = "knk_kenkork_kensa.kensa_val_059"
-		cRec[186] = "knk_kenkork_kensa.kensa_val_060"
-		cRec[187] = "knk_kenkork_kensa.kensa_val_061"
-		cRec[188] = "knk_kenkork_kensa.kensa_val_062"
-		cRec[189] = "knk_kenkork_kensa.kensa_val_063"
-		cRec[190] = "knk_kenkork_kensa.kensa_val_064"
-		cRec[191] = "knk_kenkork_kensa.kensa_val_065"
-		cRec[192] = "knk_kenkork_kensa.kensa_val_066"
-		cRec[193] = "knk_kenkork_kensa.kensa_val_067"
-		cRec[194] = "knk_kenkork_kensa.kensa_val_068"
-		cRec[195] = "knk_kenkork_kensa.kensa_val_069"
-		cRec[196] = "knk_kenkork_kensa.kensa_val_070"
-		cRec[203] = "knk_kenkork_kensa.kensa_val_020"
-		cRec[204] = "knk_kenkork_kensa.hantei_val_020"
-		cRec[205] = "knk_kenkork_kensa.kensa_val_044"
-		cRec[206] = "knk_kenkork_kensa.kensa_val_045"
-		cRec[207] = "knk_kenkork_kensa.kensa_val_016"
-		cRec[208] = "knk_kenkork_kensa.kensa_val_017"
-		cRec[209] = "knk_kenkork_kensa.kensa_val_018"
-		cRec[210] = "knk_kenkork_kensa.kensa_val_019"
-		cRec[211] = "knk_kenkork_kensa.kensa_val_046"
-		cRec[212] = "knk_kenkork_kensa.hantei_val_046"
+		cRec[47] = "knk_kenkork_kensa.kensa_val_033"
+		cRec[48] = "knk_kenkork_kensa.kensa_val_034"
+		cRec[49] = "knk_kenkork_kensa.kensa_val_035"
+		cRec[50] = "knk_kenkork_Kensa.kensa_val_080"
+		cRec[53] = "knk_kenkork_kensa.kensa_val_041"
+		cRec[54] = "knk_kenkork_kensa.kensa_val_079"
+		cRec[56] = "knk_kenkork_kensa.kensa_val_042"
+		cRec[63] = "knk_kenkork_kensa.kensa_val_031"
+		cRec[64] = "knk_kenkork_kensa.kensa_val_030"
+		cRec[69] = "knk_kenkork_kensa.kensa_val_047"
+		cRec[71] = "knk_kenkork_kensa.kensa_val_021"
+		cRec[77] = "knk_kenkork_kensa.kensa_val_010"
+		cRec[78] = "knk_kenkork_kensa.kensa_val_011"
+		cRec[79] = "knk_kenkork_kensa.kensa_val_012"
+		cRec[80] = "knk_kenkork_kensa.kensa_val_013"
+		cRec[167] = "knk_kenkork_kensa.kensa_val_072"
+		cRec[175] = "knk_kenkork_kensa.kensa_val_049"
+		cRec[178] = "knk_kenkork_kensa.kensa_val_050"
+		cRec[181] = "knk_kenkork_kensa.kensa_val_051"
+		cRec[184] = "knk_kenkork_kensa.kensa_val_052"
+		cRec[185] = "knk_kenkork_kensa.kensa_val_053"
+		cRec[186] = "knk_kenkork_kensa.kensa_val_054"
+		cRec[187] = "knk_kenkork_kensa.kensa_val_055"
+		cRec[188] = "knk_kenkork_kensa.kensa_val_056"
+		cRec[189] = "knk_kenkork_kensa.kensa_val_057"
+		cRec[190] = "knk_kenkork_kensa.kensa_val_058"
+		cRec[191] = "knk_kenkork_kensa.kensa_val_059"
+		cRec[192] = "knk_kenkork_kensa.kensa_val_060"
+		cRec[193] = "knk_kenkork_kensa.kensa_val_061"
+		cRec[194] = "knk_kenkork_kensa.kensa_val_081"
+		cRec[195] = "knk_kenkork_kensa.kensa_val_062"
+		cRec[196] = "knk_kenkork_kensa.kensa_val_063"
+		cRec[197] = "knk_kenkork_kensa.kensa_val_064"
+		cRec[198] = "knk_kenkork_kensa.kensa_val_082"
+		cRec[199] = "knk_kenkork_kensa.kensa_val_065"
+		cRec[200] = "knk_kenkork_kensa.kensa_val_066"
+		cRec[201] = "knk_kenkork_kensa.kensa_val_067"
+		cRec[202] = "knk_kenkork_kensa.kensa_val_068"
+		cRec[203] = "knk_kenkork_kensa.kensa_val_069"
+		cRec[204] = "knk_kenkork_kensa.kensa_val_070"
+		cRec[211] = "knk_kenkork_kensa.kensa_val_020"
+		cRec[212] = "knk_kenkork_kensa.hantei_val_020"
+		cRec[213] = "knk_kenkork_kensa.kensa_val_044"
+		cRec[214] = "knk_kenkork_kensa.kensa_val_045"
+		cRec[215] = "knk_kenkork_kensa.kensa_val_016"
+		cRec[216] = "knk_kenkork_kensa.kensa_val_017"
+		cRec[217] = "knk_kenkork_kensa.kensa_val_018"
+		cRec[218] = "knk_kenkork_kensa.kensa_val_019"
+		cRec[219] = "knk_kenkork_kensa.kensa_val_046"
+		cRec[220] = "knk_kenkork_kensa.hantei_val_046"
 		//writer.Write(cRec)
 		for c, cell = range cRec {
 			sheet.Cell(0, c).Value = cell
@@ -262,53 +264,56 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[43] = "検査コード039_医療機関側検査値"
 		cRec[44] = "検査コード038_医療機関側検査値"
 		cRec[45] = "検査コード037_医療機関側検査値"
-		cRec[46] = "検査コード033_医療機関側検査値"
-		cRec[47] = "検査コード034_医療機関側検査値"
-		cRec[48] = "検査コード035_医療機関側検査値"
-		cRec[51] = "検査コード041_医療機関側検査値"
-		cRec[52] = "検査コード079_医療機関側検査値"
-		cRec[54] = "検査コード042_医療機関側検査値"
-		cRec[61] = "検査コード031_医療機関側検査値"
-		cRec[62] = "検査コード030_医療機関側判定結果"
-		cRec[67] = "検査コード047_医療機関側検査値"
-		cRec[69] = "検査コード021_医療機関側検査値"
-		cRec[75] = "検査コード010_医療機関側検査値"
-		cRec[76] = "検査コード011_医療機関側検査値"
-		cRec[77] = "検査コード012_医療機関側検査値"
-		cRec[78] = "検査コード013_医療機関側検査値"
-		cRec[161] = "検査コード072_医療機関側検査値"
-		cRec[169] = "検査コード049_医療機関側検査値"
-		cRec[172] = "検査コード050_医療機関側検査値"
-		cRec[175] = "検査コード051_医療機関側検査値"
-		cRec[178] = "検査コード052_医療機関側検査値"
-		cRec[179] = "検査コード053_医療機関側検査値"
-		cRec[180] = "検査コード054_医療機関側検査値"
-		cRec[181] = "検査コード055_医療機関側検査値"
-		cRec[182] = "検査コード056_医療機関側検査値"
-		cRec[183] = "検査コード057_医療機関側検査値"
-		cRec[184] = "検査コード058_医療機関側検査値"
-		cRec[185] = "検査コード059_医療機関側検査値"
-		cRec[186] = "検査コード060_医療機関側検査値"
-		cRec[187] = "検査コード061_医療機関側検査値"
-		cRec[188] = "検査コード062_医療機関側検査値"
-		cRec[189] = "検査コード063_医療機関側検査値"
-		cRec[190] = "検査コード064_医療機関側検査値"
-		cRec[191] = "検査コード065_医療機関側検査値"
-		cRec[192] = "検査コード066_医療機関側検査値"
-		cRec[193] = "検査コード067_医療機関側検査値"
-		cRec[194] = "検査コード068_医療機関側検査値"
-		cRec[195] = "検査コード069_医療機関側検査値"
-		cRec[196] = "検査コード070_医療機関側検査値"
-		cRec[203] = "検査コード020_医療機関側検査値"
-		cRec[204] = "検査コード020_医療機関側検査値"
-		cRec[205] = "検査コード044_医療機関側検査値"
-		cRec[206] = "検査コード045_医療機関側検査値"
-		cRec[207] = "検査コード016_医療機関側検査値"
-		cRec[208] = "検査コード017_医療機関側検査値"
-		cRec[209] = "検査コード018_医療機関側検査値"
-		cRec[210] = "検査コード019_医療機関側検査値"
-		cRec[211] = "検査コード046_医療機関側検査値"
-		cRec[212] = "検査コード046_医療機関側検査値"
+		cRec[47] = "検査コード033_医療機関側検査値"
+		cRec[48] = "検査コード034_医療機関側検査値"
+		cRec[49] = "検査コード035_医療機関側検査値"
+		cRec[50] = "検査コード080_医療機関側検査値"
+		cRec[53] = "検査コード041_医療機関側検査値"
+		cRec[54] = "検査コード079_医療機関側検査値"
+		cRec[56] = "検査コード042_医療機関側検査値"
+		cRec[63] = "検査コード031_医療機関側検査値"
+		cRec[64] = "検査コード030_医療機関側判定結果"
+		cRec[69] = "検査コード047_医療機関側検査値"
+		cRec[71] = "検査コード021_医療機関側検査値"
+		cRec[77] = "検査コード010_医療機関側検査値"
+		cRec[78] = "検査コード011_医療機関側検査値"
+		cRec[79] = "検査コード012_医療機関側検査値"
+		cRec[80] = "検査コード013_医療機関側検査値"
+		cRec[167] = "検査コード072_医療機関側検査値"
+		cRec[175] = "検査コード049_医療機関側検査値"
+		cRec[178] = "検査コード050_医療機関側検査値"
+		cRec[181] = "検査コード051_医療機関側検査値"
+		cRec[184] = "検査コード052_医療機関側検査値"
+		cRec[185] = "検査コード053_医療機関側検査値"
+		cRec[186] = "検査コード054_医療機関側検査値"
+		cRec[187] = "検査コード055_医療機関側検査値"
+		cRec[188] = "検査コード056_医療機関側検査値"
+		cRec[189] = "検査コード057_医療機関側検査値"
+		cRec[190] = "検査コード058_医療機関側検査値"
+		cRec[191] = "検査コード059_医療機関側検査値"
+		cRec[192] = "検査コード060_医療機関側検査値"
+		cRec[193] = "検査コード061_医療機関側検査値"
+		cRec[194] = "検査コード081_医療機関側検査値"
+		cRec[195] = "検査コード062_医療機関側検査値"
+		cRec[196] = "検査コード063_医療機関側検査値"
+		cRec[197] = "検査コード064_医療機関側検査値"
+		cRec[198] = "検査コード082_医療機関側検査値"
+		cRec[199] = "検査コード065_医療機関側検査値"
+		cRec[200] = "検査コード066_医療機関側検査値"
+		cRec[201] = "検査コード067_医療機関側検査値"
+		cRec[202] = "検査コード068_医療機関側検査値"
+		cRec[203] = "検査コード069_医療機関側検査値"
+		cRec[204] = "検査コード070_医療機関側検査値"
+		cRec[211] = "検査コード020_医療機関側検査値"
+		cRec[212] = "検査コード020_医療機関側検査値"
+		cRec[213] = "検査コード044_医療機関側検査値"
+		cRec[214] = "検査コード045_医療機関側検査値"
+		cRec[215] = "検査コード016_医療機関側検査値"
+		cRec[216] = "検査コード017_医療機関側検査値"
+		cRec[217] = "検査コード018_医療機関側検査値"
+		cRec[218] = "検査コード019_医療機関側検査値"
+		cRec[219] = "検査コード046_医療機関側検査値"
+		cRec[220] = "検査コード046_医療機関側検査値"
 		//writer.Write(cRec)
 		for c, cell = range cRec {
 			sheet.Cell(1, c).Value = cell
@@ -318,7 +323,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 			cRec[I] = ""
 		}
 
-		cRec[0] = "社員番号"
+		cRec[0] = "従業員番号"
 		cRec[1] = "組合コード"
 		cRec[2] = "受診者ID"
 		cRec[3] = "保険証記号"
@@ -364,173 +369,181 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[43] = "中性脂肪"
 		cRec[44] = "HDLコレステロール"
 		cRec[45] = "LDLコレステロール"
-		cRec[46] = "GOT(AST)"
-		cRec[47] = "GPT(ALT)"
-		cRec[48] = "γ-GT(γ-GTP)"
-		cRec[49] = "血清クレアチニン"
-		cRec[50] = "血清尿酸"
-		cRec[51] = "空腹時血糖"
-		cRec[52] = "随時血糖"
-		cRec[53] = "HbA1c"
-		cRec[54] = "HbA1c(NGSP)"
-		cRec[55] = "尿糖"
-		cRec[56] = "尿蛋白"
-		cRec[57] = "尿潜血"
-		cRec[58] = "尿素窒素"
-		cRec[59] = "尿ウロビリノーゲン"
-		cRec[60] = "ヘマトクリット値"
-		cRec[61] = "血色素量(ヘモグロビン値)"
-		cRec[62] = "赤血球数"
-		cRec[63] = "貧血検査実施理由"
-		cRec[64] = "白血球数"
-		cRec[65] = "血小板数"
-		cRec[66] = "血清アミラーゼ"
-		cRec[67] = "心電図(所見)"
-		cRec[68] = "心電図(実施理由)"
-		cRec[69] = "胸部X線検査(所見)"
-		cRec[70] = "胸部X線検査(撮影年月日)"
-		cRec[71] = "喀痰検査(塗抹鏡検 一般細菌)(所見)"
-		cRec[72] = "喀痰検査(塗抹鏡検 抗酸菌)"
-		cRec[73] = "喀痰検査(ガフキー号数)"
-		cRec[74] = "便潜血"
-		cRec[75] = "視力(裸眼右)"
-		cRec[76] = "視力(矯正右)"
-		cRec[77] = "視力(裸眼左)"
-		cRec[78] = "視力(矯正左)"
-		cRec[79] = "聴力(右1000Hz)"
-		cRec[80] = "聴力(右4000Hz)"
-		cRec[81] = "聴力(左1000Hz)"
-		cRec[82] = "聴力(左4000Hz)"
-		cRec[83] = "聴力(その他の所見)"
-		cRec[84] = "眼底検査(キースワグナー分類)"
-		cRec[85] = "眼底検査(シェイエ分類:H)"
-		cRec[86] = "眼底検査(シェイエ分類:S)"
-		cRec[87] = "眼底検査(SCOTT分類)"
-		cRec[88] = "眼底検査(その他の所見)"
-		cRec[89] = "眼底検査(実施理由)"
-		cRec[90] = "その他の法定特殊健康診断"
-		cRec[91] = "その他の法定検査"
-		cRec[92] = "その他の検査"
-		cRec[93] = "追加項目1"
-		cRec[94] = "追加項目2"
-		cRec[95] = "追加項目3"
-		cRec[96] = "追加項目4"
-		cRec[97] = "追加項目5"
-		cRec[98] = "追加項目6"
-		cRec[99] = "追加項目7"
-		cRec[100] = "追加項目8"
-		cRec[101] = "追加項目9"
-		cRec[102] = "追加項目10"
-		cRec[103] = "BMI判定"
-		cRec[104] = "内臓脂肪面積判定"
-		cRec[105] = "腹囲判定"
-		cRec[106] = "血圧判定"
-		cRec[107] = "総コレステロール判定"
-		cRec[108] = "中性脂肪判定"
-		cRec[109] = "HDLコレステロール判定"
-		cRec[110] = "LDLコレステロール判定"
-		cRec[111] = "GOT(AST)判定"
-		cRec[112] = "GPT(ALT)判定"
-		cRec[113] = "γ-GT(γ-GTP)判定"
-		cRec[114] = "血清クレアチニン判定"
-		cRec[115] = "血清尿酸判定"
-		cRec[116] = "空腹時血糖判定"
-		cRec[117] = "随時血糖判定"
-		cRec[118] = "HbA1c判定"
-		cRec[119] = "HbA1c（NGSP)判定"
-		cRec[120] = "尿糖判定"
-		cRec[121] = "尿蛋白判定"
-		cRec[122] = "尿潜血判定"
-		cRec[123] = "尿素窒素判定"
-		cRec[124] = "尿ウロビリノーゲン判定"
-		cRec[125] = "ヘマトクリット値判定"
-		cRec[126] = "血色素量(ヘモグロビン値)判定"
-		cRec[127] = "赤血球数判定"
-		cRec[128] = "白血球数判定"
-		cRec[129] = "血小板数判定"
-		cRec[130] = "視力(右)判定"
-		cRec[131] = "視力(左)判定"
-		cRec[132] = "追加項目判定1"
-		cRec[133] = "追加項目判定2"
-		cRec[134] = "追加項目判定3"
-		cRec[135] = "追加項目判定4"
-		cRec[136] = "追加項目判定5"
-		cRec[137] = "追加項目判定6"
-		cRec[138] = "追加項目判定7"
-		cRec[139] = "追加項目判定8"
-		cRec[140] = "追加項目判定9"
-		cRec[141] = "追加項目判定10"
-		cRec[142] = "コメント"
-		cRec[143] = "総合判定"
-		cRec[144] = "受診勧奨区分"
-		cRec[145] = "指導状態"
-		cRec[146] = "再検査区分"
-		cRec[147] = "一次健診日"
-		cRec[148] = "結果通知区分"
-		cRec[149] = "メタボリック判定(血圧リスク)"
-		cRec[150] = "メタボリック判定(血糖リスク)"
-		cRec[151] = "メタボリック判定(脂質リスク)"
-		cRec[152] = "メタボリック判定(リスクカウント)"
-		cRec[153] = "支援レベル(血圧リスク)"
-		cRec[154] = "支援レベル(血糖リスク)"
-		cRec[155] = "支援レベル(脂質リスク)"
-		cRec[156] = "支援レベル(喫煙リスク)"
-		cRec[157] = "支援レベル(リスクカウント)"
-		cRec[158] = "メタボリックシンドローム判定"
-		cRec[159] = "支援レベル"
-		cRec[160] = "医師の診断(判定)"
-		cRec[161] = "健康診断を実施した医師の氏名"
-		cRec[162] = "医師の意見"
-		cRec[163] = "意見を述べた医師の氏名"
-		cRec[164] = "歯科医師による健康診断"
-		cRec[165] = "歯科医師による健康診断を実施した歯科医師の氏名"
-		cRec[166] = "歯科医師の意見"
-		cRec[167] = "意見を述べた歯科医師の氏名"
-		cRec[168] = "備考"
-		cRec[169] = "服薬１_血圧"
-		cRec[170] = "血圧_薬剤"
-		cRec[171] = "血圧_服薬理由"
-		cRec[172] = "服薬２_血糖"
-		cRec[173] = "血糖_薬剤"
-		cRec[174] = "血糖_服薬理由"
-		cRec[175] = "服薬３_脂質"
-		cRec[176] = "脂質_薬剤"
-		cRec[177] = "脂質_服薬理由"
-		cRec[178] = "既往歴１_脳血管"
-		cRec[179] = "既往歴２_心血管"
-		cRec[180] = "既往歴３_腎不全人工透析"
-		cRec[181] = "貧血"
-		cRec[182] = "喫煙"
-		cRec[183] = "２０歳からの体重変化"
-		cRec[184] = "３０分以上の運動習慣"
-		cRec[185] = "歩行又は身体活動"
-		cRec[186] = "歩行速度"
-		cRec[187] = "１年間の体重変化"
-		cRec[188] = "食べ方１_早食い等"
-		cRec[189] = "食べ方２_就寝前"
-		cRec[190] = "食べ方３_夜食間食"
-		cRec[191] = "食習慣"
-		cRec[192] = "飲酒"
-		cRec[193] = "飲酒量"
-		cRec[194] = "睡眠"
-		cRec[195] = "生活習慣の改善"
-		cRec[196] = "保健指導の希望"
-		cRec[197] = "報告対象区分"
-		cRec[198] = "保健指導からの除外"
-		cRec[199] = "取込年月日"
-		cRec[200] = "胸部X線判定"
-		cRec[201] = "胸部判定アルファベット"
-		cRec[202] = "心電図判定アルファベット"
-		cRec[203] = "胸部レントゲン検査"
-		cRec[204] = "胸部レントゲン判定"
-		cRec[205] = "尿糖"
-		cRec[206] = "尿蛋白"
-		cRec[207] = "聴力(右1000Hz)"
-		cRec[208] = "聴力(右4000Hz)"
-		cRec[209] = "聴力(左1000Hz)"
-		cRec[210] = "聴力(左4000Hz)"
-		cRec[211] = "心電図検査"
-		cRec[212] = "心電図判定"
+		cRec[46] = "NON-HDLコレステロール"
+		cRec[47] = "GOT(AST)"
+		cRec[48] = "GPT(ALT)"
+		cRec[49] = "γ-GT(γ-GTP)"
+		cRec[50] = "血清クレアチニン"
+		cRec[51] = "eGFR"
+		cRec[52] = "血清尿酸"
+		cRec[53] = "空腹時血糖"
+		cRec[54] = "随時血糖"
+		cRec[55] = "HbA1c"
+		cRec[56] = "HbA1c(NGSP)"
+		cRec[57] = "尿糖"
+		cRec[58] = "尿蛋白"
+		cRec[59] = "尿潜血"
+		cRec[60] = "尿素窒素"
+		cRec[61] = "尿ウロビリノーゲン"
+		cRec[62] = "ヘマトクリット値"
+		cRec[63] = "血色素量(ヘモグロビン値)"
+		cRec[64] = "赤血球数"
+		cRec[65] = "貧血検査実施理由"
+		cRec[66] = "白血球数"
+		cRec[67] = "血小板数"
+		cRec[68] = "血清アミラーゼ"
+		cRec[69] = "心電図(所見)"
+		cRec[70] = "心電図(実施理由)"
+		cRec[71] = "胸部X線検査(所見)"
+		cRec[72] = "胸部X線検査(撮影年月日)"
+		cRec[73] = "喀痰検査(塗抹鏡検 一般細菌)(所見)"
+		cRec[74] = "喀痰検査(塗抹鏡検 抗酸菌)"
+		cRec[75] = "喀痰検査(ガフキー号数)"
+		cRec[76] = "便潜血"
+		cRec[77] = "視力(裸眼右)"
+		cRec[78] = "視力(矯正右)"
+		cRec[79] = "視力(裸眼左)"
+		cRec[80] = "視力(矯正左)"
+		cRec[81] = "聴力(右1000Hz)"
+		cRec[82] = "聴力(右4000Hz)"
+		cRec[83] = "聴力(左1000Hz)"
+		cRec[84] = "聴力(左4000Hz)"
+		cRec[85] = "聴力(その他の所見)"
+		cRec[86] = "眼底検査(キースワグナー分類)"
+		cRec[87] = "眼底検査(シェイエ分類:H)"
+		cRec[88] = "眼底検査(シェイエ分類:S)"
+		cRec[89] = "眼底検査(SCOTT分類)"
+		cRec[90] = "眼底検査（wong-Mitchell分類）"
+		cRec[91] = "眼底検査（改変Davis分類）"
+		cRec[92] = "眼底検査(その他の所見)"
+		cRec[93] = "眼底検査(実施理由)"
+		cRec[94] = "その他の法定特殊健康診断"
+		cRec[95] = "その他の法定検査"
+		cRec[96] = "その他の検査"
+		cRec[97] = "追加項目1"
+		cRec[98] = "追加項目2"
+		cRec[99] = "追加項目3"
+		cRec[100] = "追加項目4"
+		cRec[101] = "追加項目5"
+		cRec[102] = "追加項目6"
+		cRec[103] = "追加項目7"
+		cRec[104] = "追加項目8"
+		cRec[105] = "追加項目9"
+		cRec[106] = "追加項目10"
+		cRec[107] = "BMI判定"
+		cRec[108] = "内臓脂肪面積判定"
+		cRec[109] = "腹囲判定"
+		cRec[110] = "血圧判定"
+		cRec[111] = "総コレステロール判定"
+		cRec[112] = "中性脂肪判定"
+		cRec[113] = "HDLコレステロール判定"
+		cRec[114] = "LDLコレステロール判定"
+		cRec[115] = "NON-HDLコレステロール判定"
+		cRec[116] = "GOT(AST)判定"
+		cRec[117] = "GPT(ALT)判定"
+		cRec[118] = "γ-GT(γ-GTP)判定"
+		cRec[119] = "血清クレアチニン判定"
+		cRec[120] = "eGFR判定"
+		cRec[121] = "血清尿酸判定"
+		cRec[122] = "空腹時血糖判定"
+		cRec[123] = "随時血糖判定"
+		cRec[124] = "HbA1c判定"
+		cRec[125] = "HbA1c（NGSP)判定"
+		cRec[126] = "尿糖判定"
+		cRec[127] = "尿蛋白判定"
+		cRec[128] = "尿潜血判定"
+		cRec[129] = "尿素窒素判定"
+		cRec[130] = "尿ウロビリノーゲン判定"
+		cRec[131] = "ヘマトクリット値判定"
+		cRec[132] = "血色素量(ヘモグロビン値)判定"
+		cRec[133] = "赤血球数判定"
+		cRec[134] = "白血球数判定"
+		cRec[135] = "血小板数判定"
+		cRec[136] = "視力(右)判定"
+		cRec[137] = "視力(左)判定"
+		cRec[138] = "追加項目判定1"
+		cRec[139] = "追加項目判定2"
+		cRec[140] = "追加項目判定3"
+		cRec[141] = "追加項目判定4"
+		cRec[142] = "追加項目判定5"
+		cRec[143] = "追加項目判定6"
+		cRec[144] = "追加項目判定7"
+		cRec[145] = "追加項目判定8"
+		cRec[146] = "追加項目判定9"
+		cRec[147] = "追加項目判定10"
+		cRec[148] = "コメント"
+		cRec[149] = "総合判定"
+		cRec[150] = "受診勧奨区分"
+		cRec[151] = "指導状態"
+		cRec[152] = "再検査区分"
+		cRec[153] = "一次健診日"
+		cRec[154] = "結果通知区分"
+		cRec[155] = "メタボリック判定(血圧リスク)"
+		cRec[156] = "メタボリック判定(血糖リスク)"
+		cRec[157] = "メタボリック判定(脂質リスク)"
+		cRec[158] = "メタボリック判定(リスクカウント)"
+		cRec[159] = "支援レベル(血圧リスク)"
+		cRec[160] = "支援レベル(血糖リスク)"
+		cRec[161] = "支援レベル(脂質リスク)"
+		cRec[162] = "支援レベル(喫煙リスク)"
+		cRec[163] = "支援レベル(リスクカウント)"
+		cRec[164] = "メタボリックシンドローム判定"
+		cRec[165] = "支援レベル"
+		cRec[166] = "医師の診断(判定)"
+		cRec[167] = "健康診断を実施した医師の氏名"
+		cRec[168] = "医師の意見"
+		cRec[169] = "意見を述べた医師の氏名"
+		cRec[170] = "歯科医師による健康診断"
+		cRec[171] = "歯科医師による健康診断を実施した歯科医師の氏名"
+		cRec[172] = "歯科医師の意見"
+		cRec[173] = "意見を述べた歯科医師の氏名"
+		cRec[174] = "備考"
+		cRec[175] = "服薬１_血圧"
+		cRec[176] = "血圧_薬剤"
+		cRec[177] = "血圧_服薬理由"
+		cRec[178] = "服薬２_血糖"
+		cRec[179] = "血糖_薬剤"
+		cRec[180] = "血糖_服薬理由"
+		cRec[181] = "服薬３_脂質"
+		cRec[182] = "脂質_薬剤"
+		cRec[183] = "脂質_服薬理由"
+		cRec[184] = "既往歴１_脳血管"
+		cRec[185] = "既往歴２_心血管"
+		cRec[186] = "既往歴３_腎不全人工透析"
+		cRec[187] = "貧血"
+		cRec[188] = "喫煙"
+		cRec[189] = "２０歳からの体重変化"
+		cRec[190] = "３０分以上の運動習慣"
+		cRec[191] = "歩行又は身体活動"
+		cRec[192] = "歩行速度"
+		cRec[193] = "１年間の体重変化"
+		cRec[194] = "食事についての咀嚼"
+		cRec[195] = "食べ方１_早食い等"
+		cRec[196] = "食べ方２_就寝前"
+		cRec[197] = "食べ方３_夜食間食"
+		cRec[198] = "食べ方３_三食以外の間食"
+		cRec[199] = "食習慣"
+		cRec[200] = "飲酒"
+		cRec[201] = "飲酒量"
+		cRec[202] = "睡眠"
+		cRec[203] = "生活習慣の改善"
+		cRec[204] = "保健指導の希望"
+		cRec[205] = "報告対象区分"
+		cRec[206] = "保健指導からの除外"
+		cRec[207] = "取込年月日"
+		cRec[208] = "胸部X線判定①"
+		cRec[209] = "胸部X線判定②"
+		cRec[210] = "心電図判定"
+		cRec[211] = "胸部レントゲン検査"
+		cRec[212] = "胸部レントゲン判定"
+		cRec[213] = "尿糖"
+		cRec[214] = "尿蛋白"
+		cRec[215] = "聴力(右1000Hz)"
+		cRec[216] = "聴力(右4000Hz)"
+		cRec[217] = "聴力(左1000Hz)"
+		cRec[218] = "聴力(左4000Hz)"
+		cRec[219] = "心電図検査"
+		cRec[220] = "心電図判定"
 		//writer.Write(cRec)
 		for c, cell = range cRec {
 			sheet.Cell(2, c).Value = cell
@@ -699,442 +712,462 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				// 45.LDLコレステロール
 				cRec[45] = inRecs[J][56]
 
-				// 46.GOT(AST)
+				// 46.NON-HDLコレステロール
 				cRec[46] = inRecs[J][57]
 
-				// 47.GPT(ALT)
+				// 47.GOT(AST)
 				cRec[47] = inRecs[J][58]
 
-				// 48.γ-GT(γ-GTP)
+				// 48.GPT(ALT)
 				cRec[48] = inRecs[J][59]
 
-				// 49.血清クレアチニン
+				// 49.γ-GT(γ-GTP)
 				cRec[49] = inRecs[J][60]
 
-				// 50.血清尿酸
+				// 50.血清クレアチニン
 				cRec[50] = inRecs[J][61]
 
-				// 51.空腹時血糖
-				// 52.随時血糖
+				// 51.eGFR
+				cRec[51] = inRecs[J][62]
+
+				// 52.血清尿酸
+				cRec[52] = inRecs[J][63]
+
+				// 53.空腹時血糖
+				// 54.随時血糖
 				if syokugo(inRecs[J][51], inRecs[J][52]) {
-					cRec[52] = inRecs[J][62]
+					cRec[54] = inRecs[J][64]
 				} else {
-					cRec[51] = inRecs[J][62]
+					cRec[53] = inRecs[J][64]
 				}
 
-				// 53.HbA1c
-				// 54.HbA1c(NGSP)
-				cRec[54] = inRecs[J][63]
-
-				// 55.尿糖
-				cRec[55] = inRecs[J][64]
-
-				// 56.尿蛋白
+				// 55.HbA1c
+				// 56.HbA1c(NGSP)
 				cRec[56] = inRecs[J][65]
 
-				// 57.尿潜血
+				// 57.尿糖
 				cRec[57] = inRecs[J][66]
 
-				// 58.尿素窒素
+				// 58.尿蛋白
 				cRec[58] = inRecs[J][67]
 
-				// 59.尿ウロビリノーゲン
+				// 59.尿潜血
 				cRec[59] = inRecs[J][68]
 
-				// 60.ヘマトクリット値
+				// 60.尿素窒素
 				cRec[60] = inRecs[J][69]
 
-				// 61.血色素量(ヘモグロビン値)
+				// 61.尿ウロビリノーゲン
 				cRec[61] = inRecs[J][70]
 
-				// 62.赤血球数
+				// 62.ヘマトクリット値
 				cRec[62] = inRecs[J][71]
 
-				// 63.貧血検査実施理由
+				// 63.血色素量(ヘモグロビン値)
+				cRec[63] = inRecs[J][72]
 
-				// 64.白血球数
-				cRec[64] = inRecs[J][72]
+				// 64.赤血球数
+				cRec[64] = inRecs[J][73]
 
-				// 65.血小板数
-				cRec[65] = inRecs[J][73]
+				// 65.貧血検査実施理由
 
-				// 66.血清アミラーゼ
+				// 66.白血球数
 				cRec[66] = inRecs[J][74]
 
-				// 67.心電図(所見)
-				cRec[67] = syoken(inRecs[J][76] + " " + inRecs[J][77] + " " + inRecs[J][78] + " " + inRecs[J][79])
+				// 67.血小板数
+				cRec[67] = inRecs[J][75]
 
-				// 68.心電図(実施理由)
+				// 68.血清アミラーゼ
+				cRec[68] = inRecs[J][76]
 
-				// 69.胸部X線検査(所見)
-				cRec[69] = syoken(inRecs[J][81] + " " + inRecs[J][82] + " " + inRecs[J][83])
+				// 69.心電図(所見)
+				cRec[69] = syoken(inRecs[J][78] + " " + inRecs[J][79] + " " + inRecs[J][80] + " " + inRecs[J][81])
 
-				// 70.胸部X線検査(撮影年月日)
-				if inRecs[J][80] != "" {
-					cRec[70] = strings.Replace(inRecs[J][15], "-", "/", -1)
+				// 70.心電図(実施理由)
+
+				// 71.胸部X線検査(所見)
+				cRec[71] = syoken(inRecs[J][83] + " " + inRecs[J][84] + " " + inRecs[J][85])
+
+				// 72.胸部X線検査(撮影年月日)
+				if inRecs[J][82] != "" {
+					cRec[72] = strings.Replace(inRecs[J][15], "-", "/", -1)
 				}
 
-				// 71.喀痰検査(塗抹鏡検 一般細菌)(所見)
+				// 73.喀痰検査(塗抹鏡検 一般細菌)(所見)
 
-				// 72.喀痰検査(塗抹鏡検 抗酸菌)
+				// 74.喀痰検査(塗抹鏡検 抗酸菌)
 
-				// 73.喀痰検査(ガフキー号数)
+				// 75.喀痰検査(ガフキー号数)
 
-				// 74.便潜血
-				cRec[74] = inRecs[J][84]
+				// 76.便潜血
+				cRec[76] = inRecs[J][86]
 
-				// 75.視力(裸眼右)
-				cRec[75] = eye(inRecs[J][85])
-
-				// 76.視力(矯正右)
-				cRec[76] = eye(inRecs[J][86])
-
-				// 77.視力(裸眼左)
+				// 77.視力(裸眼右)
 				cRec[77] = eye(inRecs[J][87])
 
-				// 78.視力(矯正左)
+				// 78.視力(矯正右)
 				cRec[78] = eye(inRecs[J][88])
 
-				// 79.聴力(右1000Hz)
-				cRec[79] = syokenumu(inRecs[J][97])
+				// 79.視力(裸眼左)
+				cRec[79] = eye(inRecs[J][89])
 
-				// 80.聴力(右4000Hz)
-				cRec[80] = syokenumu4k(inRecs[J][99], inRecs[J][101])
+				// 80.視力(矯正左)
+				cRec[80] = eye(inRecs[J][90])
 
-				// 81.聴力(左1000Hz)
-				cRec[81] = syokenumu(inRecs[J][98])
+				// 81.聴力(右1000Hz)
+				cRec[81] = syokenumu(inRecs[J][99])
 
-				// 82.聴力(左4000Hz)
-				cRec[82] = syokenumu4k(inRecs[J][100], inRecs[J][102])
+				// 82.聴力(右4000Hz)
+				cRec[82] = syokenumu4k(inRecs[J][101], inRecs[J][103])
 
-				// 83.聴力(その他の所見)
+				// 83.聴力(左1000Hz)
+				cRec[83] = syokenumu(inRecs[J][100])
 
-				// 84.眼底検査(キースワグナー分類)
+				// 84.聴力(左4000Hz)
+				cRec[84] = syokenumu4k(inRecs[J][102], inRecs[J][104])
 
-				// 85.眼底検査(シェイエ分類:H)
+				// 85.聴力(その他の所見)
 
-				// 86.眼底検査(シェイエ分類:S)
+				// 86.眼底検査(キースワグナー分類)
 
-				// 87.眼底検査(SCOTT分類)
+				// 87.眼底検査(シェイエ分類:H)
 
-				// 88.眼底検査(その他の所見)
+				// 88.眼底検査(シェイエ分類:S)
 
-				// 89.眼底検査(実施理由)
+				// 89.眼底検査(SCOTT分類)
 
-				// 90.その他の法定特殊健康診断
+				// 90.眼底検査(wong-Mitchell分類)
 
-				// 91.その他の法定検査
+				// 91.眼底検査(改変Davis分類)
 
-				// 92.その他の検査
+				// 92.眼底検査(その他の所見)
 
-				// 93.追加項目1
+				// 93.眼底検査(実施理由)
 
-				// 94.追加項目2
+				// 94.その他の法定特殊健康診断
 
-				// 95.追加項目3
+				// 95.その他の法定検査
 
-				// 96.追加項目4
+				// 96.その他の検査
 
-				// 97.追加項目5
+				// 97.追加項目1
 
-				// 98.追加項目6
+				// 98.追加項目2
 
-				// 99.追加項目7
+				// 99.追加項目3
 
-				// 100.追加項目8
+				// 100.追加項目4
 
-				// 101.追加項目9
+				// 101.追加項目5
 
-				// 102.追加項目10
+				// 102.追加項目6
 
-				// 103.BMI判定
-				cRec[103] = inRecs[J][103]
+				// 103.追加項目7
 
-				// 104.内臓脂肪面積判定
+				// 104.追加項目8
 
-				// 105.腹囲判定
-				cRec[105] = inRecs[J][104]
+				// 105.追加項目9
 
-				// 106.血圧判定
-				cRec[106] = string(norm.NFKC.Bytes([]byte(inRecs[J][105])))
+				// 106.追加項目10
 
-				// 107.総コレステロール判定
-				cRec[107] = inRecs[J][106]
+				// 107.BMI判定
+				cRec[107] = inRecs[J][105]
 
-				// 108.中性脂肪判定
-				cRec[108] = inRecs[J][107]
+				// 108.内臓脂肪面積判定
 
-				// 109.HDLコレステロール判定
-				cRec[109] = inRecs[J][108]
+				// 109.腹囲判定
+				cRec[109] = inRecs[J][106]
 
-				// 110.LDLコレステロール判定
-				cRec[110] = inRecs[J][109]
+				// 110.血圧判定
+				cRec[110] = string(norm.NFKC.Bytes([]byte(inRecs[J][107])))
 
-				// 111.GOT(AST)判定
-				cRec[111] = inRecs[J][110]
+				// 111.総コレステロール判定
+				cRec[111] = inRecs[J][108]
 
-				// 112.GPT(ALT)判定
-				cRec[112] = inRecs[J][111]
+				// 112.中性脂肪判定
+				cRec[112] = inRecs[J][109]
 
-				// 113.γ-GT(γ-GTP)判定
-				cRec[113] = inRecs[J][112]
+				// 113.HDLコレステロール判定
+				cRec[113] = inRecs[J][110]
 
-				// 114.血清クレアチニン判定
-				cRec[114] = inRecs[J][113]
+				// 114.LDLコレステロール判定
+				cRec[114] = inRecs[J][111]
 
-				// 115.血清尿酸判定
-				cRec[115] = inRecs[J][114]
+				// 115.NON-HDLコレステロール判定
+				cRec[115] = inRecs[J][112]
 
-				// 116.空腹時血糖判定
-				// 117.随時血糖判定
-				if syokugo(inRecs[J][51], inRecs[J][52]) {
-					cRec[117] = toH(inRecs[J][62])
-				} else {
-					cRec[116] = inRecs[J][115]
-				}
+				// 116.GOT(AST)判定
+				cRec[116] = inRecs[J][113]
 
-				// 118.HbA1c判定
+				// 117.GPT(ALT)判定
+				cRec[117] = inRecs[J][114]
 
-				// 119.HbA1c（NGSP)判定
+				// 118.γ-GT(γ-GTP)判定
+				cRec[118] = inRecs[J][115]
+
+				// 119.血清クレアチニン判定
 				cRec[119] = inRecs[J][116]
 
-				// 120.尿糖判定
+				// 120.eGFR判定
 				cRec[120] = inRecs[J][117]
 
-				// 121.尿蛋白判定
+				// 121.血清尿酸判定
 				cRec[121] = inRecs[J][118]
 
-				// 122.尿潜血判定
-				cRec[122] = inRecs[J][119]
+				// 122.空腹時血糖判定
+				// 123.随時血糖判定
+				if syokugo(inRecs[J][51], inRecs[J][52]) {
+					cRec[123] = toH(inRecs[J][64])
+				} else {
+					cRec[122] = inRecs[J][119]
+				}
 
-				// 123.尿素窒素判定
-				cRec[123] = inRecs[J][120]
+				// 124.HbA1c判定
 
-				// 124.尿ウロビリノーゲン判定
-				cRec[124] = inRecs[J][121]
+				// 125.HbA1c（NGSP)判定
+				cRec[125] = inRecs[J][120]
 
-				// 125.ヘマトクリット値判定
-				cRec[125] = inRecs[J][122]
+				// 126.尿糖判定
+				cRec[126] = inRecs[J][121]
 
-				// 126.血色素量(ヘモグロビン値)判定
-				cRec[126] = inRecs[J][123]
+				// 127.尿蛋白判定
+				cRec[127] = inRecs[J][122]
 
-				// 127.赤血球数判定
-				cRec[127] = inRecs[J][124]
+				// 128.尿潜血判定
+				cRec[128] = inRecs[J][123]
 
-				// 128.白血球数判定
-				cRec[128] = inRecs[J][125]
+				// 129.尿素窒素判定
+				cRec[129] = inRecs[J][124]
 
-				// 129.血小板数判定
-				cRec[129] = inRecs[J][126]
+				// 130.尿ウロビリノーゲン判定
+				cRec[130] = inRecs[J][125]
 
-				// 130.視力(右)判定
-				cRec[130] = eyeHantei(inRecs[J][127], inRecs[J][128])
+				// 131.ヘマトクリット値判定
+				cRec[131] = inRecs[J][126]
 
-				// 131.視力(左)判定
-				cRec[131] = eyeHantei(inRecs[J][129], inRecs[J][130])
+				// 132.血色素量(ヘモグロビン値)判定
+				cRec[132] = inRecs[J][127]
 
-				// 132.追加項目判定1
+				// 133.赤血球数判定
+				cRec[133] = inRecs[J][128]
 
-				// 133.追加項目判定2
+				// 134.白血球数判定
+				cRec[134] = inRecs[J][129]
 
-				// 134.追加項目判定3
+				// 135.血小板数判定
+				cRec[135] = inRecs[J][130]
 
-				// 135.追加項目判定4
+				// 136.視力(右)判定
+				cRec[136] = eyeHantei(inRecs[J][131], inRecs[J][132])
 
-				// 136.追加項目判定5
+				// 137.視力(左)判定
+				cRec[137] = eyeHantei(inRecs[J][133], inRecs[J][134])
 
-				// 137.追加項目判定6
+				// 138.追加項目判定1
 
-				// 138.追加項目判定7
+				// 139.追加項目判定2
 
-				// 139.追加項目判定8
+				// 140.追加項目判定3
 
-				// 140.追加項目判定9
+				// 141.追加項目判定4
 
-				// 141.追加項目判定10
+				// 142.追加項目判定5
 
-				// 142.コメント
+				// 143.追加項目判定6
 
-				// 143.総合判定
-				cRec[143] = inRecs[J][131]
+				// 144.追加項目判定7
 
-				// 144.受診勧奨区分
+				// 145.追加項目判定8
 
-				// 145.指導状態
+				// 146.追加項目判定9
 
-				// 146.再検査区分
+				// 147.追加項目判定10
 
-				// 147.一次健診日
+				// 148.コメント
 
-				// 148.結果通知区分
+				// 149.総合判定
+				cRec[149] = inRecs[J][135]
 
-				// 149.メタボリック判定(血圧リスク)
+				// 150.受診勧奨区分
 
-				// 150.メタボリック判定(血糖リスク)
+				// 151.指導状態
 
-				// 151.メタボリック判定(脂質リスク)
+				// 152.再検査区分
 
-				// 152.メタボリック判定(リスクカウント)
+				// 153.一次健診日
 
-				// 153.支援レベル(血圧リスク)
+				// 154.結果通知区分
 
-				// 154.支援レベル(血糖リスク)
+				// 155.メタボリック判定(血圧リスク)
 
-				// 155.支援レベル(脂質リスク)
+				// 156.メタボリック判定(血糖リスク)
 
-				// 156.支援レベル(喫煙リスク)
+				// 157.メタボリック判定(脂質リスク)
 
-				// 157.支援レベル(リスクカウント)
+				// 158.メタボリック判定(リスクカウント)
 
-				// 158.メタボリックシンドローム判定
-				cRec[158] = inRecs[J][133]
+				// 159.支援レベル(血圧リスク)
 
-				// 159.支援レベル
-				cRec[159] = inRecs[J][134]
+				// 160.支援レベル(血糖リスク)
 
-				// 160.医師の診断(判定)
-				cRec[160] = inRecs[J][132]
+				// 161.支援レベル(脂質リスク)
 
-				// 161.健康診断を実施した医師の氏名
-				cRec[161] = "寺門　節雄"
+				// 162.支援レベル(喫煙リスク)
 
-				// 162.医師の意見
+				// 163.支援レベル(リスクカウント)
 
-				// 163.意見を述べた医師の氏名
+				// 164.メタボリックシンドローム判定
+				cRec[164] = inRecs[J][137]
 
-				// 164.歯科医師による健康診断
+				// 165.支援レベル
+				cRec[165] = inRecs[J][138]
 
-				// 165.歯科医師による健康診断を実施した歯科医師の氏名
+				// 166.医師の診断(判定)
+				cRec[166] = inRecs[J][136]
 
-				// 166.歯科医師の意見
+				// 167.健康診断を実施した医師の氏名
+				cRec[167] = "寺門　節雄"
 
-				// 167.意見を述べた歯科医師の氏名
+				// 168.医師の意見
 
-				// 168.備考
+				// 169.意見を述べた医師の氏名
 
-				// 169.服薬１_血圧
-				cRec[169] = inRecs[J][135]
+				// 170.歯科医師による健康診断
 
-				// 170.血圧_薬剤
+				// 171.歯科医師による健康診断を実施した歯科医師の氏名
 
-				// 171.血圧_服薬理由
+				// 172.歯科医師の意見
 
-				// 172.服薬２_血糖
-				cRec[172] = inRecs[J][136]
+				// 173.意見を述べた歯科医師の氏名
 
-				// 173.血糖_薬剤
+				// 174.備考
 
-				// 174.血糖_服薬理由
+				// 175.服薬１_血圧
+				cRec[175] = inRecs[J][139]
 
-				// 175.服薬３_脂質
-				cRec[175] = inRecs[J][137]
+				// 176.血圧_薬剤
 
-				// 176.脂質_薬剤
+				// 177.血圧_服薬理由
 
-				// 177.脂質_服薬理由
+				// 178.服薬２_血糖
+				cRec[178] = inRecs[J][140]
 
-				// 178.既往歴１_脳血管
-				cRec[178] = inRecs[J][138]
+				// 179.血糖_薬剤
 
-				// 179.既往歴２_心血管
-				cRec[179] = inRecs[J][139]
+				// 180.血糖_服薬理由
 
-				// 180.既往歴３_腎不全人工透析
-				cRec[180] = inRecs[J][140]
-
-				// 181.貧血
+				// 181.服薬３_脂質
 				cRec[181] = inRecs[J][141]
 
-				// 182.喫煙
-				cRec[182] = inRecs[J][142]
+				// 182.脂質_薬剤
 
-				// 183.２０歳からの体重変化
-				cRec[183] = inRecs[J][143]
+				// 183.脂質_服薬理由
 
-				// 184.３０分以上の運動習慣
-				cRec[184] = inRecs[J][144]
+				// 184.既往歴１_脳血管
+				cRec[184] = inRecs[J][142]
 
-				// 185.歩行又は身体活動
-				cRec[185] = inRecs[J][145]
+				// 185.既往歴２_心血管
+				cRec[185] = inRecs[J][143]
 
-				// 186.歩行速度
-				cRec[186] = inRecs[J][146]
+				// 186.既往歴３_腎不全人工透析
+				cRec[186] = inRecs[J][144]
 
-				// 187.１年間の体重変化
-				cRec[187] = inRecs[J][147]
+				// 187.貧血
+				cRec[187] = inRecs[J][145]
 
-				// 188.食べ方１_早食い等
-				cRec[188] = inRecs[J][148]
+				// 188.喫煙
+				cRec[188] = inRecs[J][146]
 
-				// 189.食べ方２_就寝前
-				cRec[189] = inRecs[J][149]
+				// 189.２０歳からの体重変化
+				cRec[189] = inRecs[J][147]
 
-				// 190.食べ方３_夜食間食
-				cRec[190] = inRecs[J][150]
+				// 190.３０分以上の運動習慣
+				cRec[190] = inRecs[J][148]
 
-				// 191.食習慣
-				cRec[191] = inRecs[J][151]
+				// 191.歩行又は身体活動
+				cRec[191] = inRecs[J][149]
 
-				// 192.飲酒
-				cRec[192] = inRecs[J][152]
+				// 192.歩行速度
+				cRec[192] = inRecs[J][150]
 
-				// 193.飲酒量
-				cRec[193] = inRecs[J][153]
+				// 193.１年間の体重変化
 
-				// 194.睡眠
-				cRec[194] = inRecs[J][154]
+				// 194.食事についての咀嚼
+				cRec[194] = inRecs[J][151]
 
-				// 195.生活習慣の改善
-				cRec[195] = inRecs[J][155]
+				// 195.食べ方１_早食い等
+				cRec[195] = inRecs[J][152]
 
-				// 196.保健指導の希望
-				cRec[196] = inRecs[J][156]
+				// 196.食べ方２_就寝前
+				cRec[196] = inRecs[J][153]
 
-				// 197.報告対象区分
+				// 197.食べ方３_夜食間食
 
-				// 198.保健指導からの除外
+				// 198.食べ方３_三食以外の間食
+				cRec[198] = inRecs[J][154]
 
-				// 199.取込年月日
+				// 199.食習慣
+				cRec[199] = inRecs[J][155]
 
-				// 200.胸部X線判定
-				cRec[200] = string(norm.NFKC.Bytes([]byte(inRecs[J][80])))
+				// 200.飲酒
+				cRec[200] = inRecs[J][156]
 
-				// 201.胸部判定アルファベット
-				cRec[201] = string(norm.NFKC.Bytes([]byte(inRecs[J][80])))
+				// 201.飲酒量
+				cRec[201] = inRecs[J][157]
 
-				// 202.心電図判定アルファベット
-				cRec[202] = string(norm.NFKC.Bytes([]byte(inRecs[J][75])))
+				// 202.睡眠
+				cRec[202] = inRecs[J][158]
 
-				// 203.胸部レントゲン検査
-				cRec[203] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][80]))))
+				// 203.生活習慣の改善
+				cRec[203] = inRecs[J][159]
 
-				// 204.胸部レントゲン判定
-				cRec[204] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][80]))))
+				// 204.保健指導の希望
+				cRec[204] = inRecs[J][160]
 
-				// 205.尿糖
-				cRec[205] = nyou(inRecs[J][64])
+				// 205.報告対象区分
 
-				// 206.尿蛋白
-				cRec[206] = nyou(inRecs[J][65])
+				// 206.保健指導からの除外
 
-				// 207.聴力(右1000Hz)
-				cRec[207] = syokenumuCode(syokenumu(inRecs[J][97]))
+				// 207.取込年月日
 
-				// 208.聴力(右4000Hz)
-				cRec[208] = syokenumuCode(syokenumu4k(inRecs[J][99], inRecs[J][101]))
+				// 208.胸部X線判定①
+				cRec[208] = string(norm.NFKC.Bytes([]byte(inRecs[J][82])))
 
-				// 209.聴力(左1000Hz)
-				cRec[209] = syokenumuCode(syokenumu(inRecs[J][98]))
+				// 209.胸部X線判定②
+				cRec[209] = string(norm.NFKC.Bytes([]byte(inRecs[J][82])))
 
-				// 210.聴力(左4000Hz)
-				cRec[210] = syokenumuCode(syokenumu4k(inRecs[J][100], inRecs[J][102]))
+				// 210.心電図判定
+				cRec[210] = string(norm.NFKC.Bytes([]byte(inRecs[J][77])))
 
-				// 211.心電図検査
-				cRec[211] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][75]))))
+				// 211.胸部レントゲン検査
+				cRec[211] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][82]))))
 
-				// 212.心電図判定
-				cRec[212] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][75]))))
+				// 212.胸部レントゲン判定
+				cRec[212] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][82]))))
+
+				// 213.尿糖
+				cRec[213] = nyou(inRecs[J][66])
+
+				// 214.尿蛋白
+				cRec[214] = nyou(inRecs[J][67])
+
+				// 215.聴力(右1000Hz)
+				cRec[215] = syokenumuCode(syokenumu(inRecs[J][99]))
+
+				// 216.聴力(右4000Hz)
+				cRec[216] = syokenumuCode(syokenumu4k(inRecs[J][101], inRecs[J][103]))
+
+				// 217.聴力(左1000Hz)
+				cRec[217] = syokenumuCode(syokenumu(inRecs[J][100]))
+
+				// 218.聴力(左4000Hz)
+				cRec[218] = syokenumuCode(syokenumu4k(inRecs[J][102], inRecs[J][104]))
+
+				// 219.心電図検査
+				cRec[219] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][77]))))
+
+				// 220.心電図判定
+				cRec[220] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][77]))))
 
 				//writer.Write(cRec)
 				for c, cell = range cRec {
