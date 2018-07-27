@@ -89,6 +89,8 @@ func coSurvey(records [][]string) [][]string {
 		{"2000100100000005", "（株）トヨテック", "0"},
 		{"2000100100000011", "東京トヨタカーライフサービス（株）", "0"},
 		{"2000100100000991", "株式会社　センチュリーサービス", "0"},
+		{"2000100100000004", "トヨタアドミニスタ株式会社", "0"},
+		{"2000100100000911", "株式会社　トヨテック", "0"},
 	}
 
 	coRecMax := len(records)
@@ -1091,6 +1093,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				cRec[192] = inRecs[J][150]
 
 				// 193.１年間の体重変化
+				//cRec[193] = inRecs[J][151]
 
 				// 194.食事についての咀嚼
 				cRec[194] = inRecs[J][151]
@@ -1102,6 +1105,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				cRec[196] = inRecs[J][153]
 
 				// 197.食べ方３_夜食間食
+				//cRec[197] = inRecs[J][154]
 
 				// 198.食べ方３_三食以外の間食
 				cRec[198] = inRecs[J][154]
