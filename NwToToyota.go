@@ -82,14 +82,13 @@ func readfile(filename string) [][]string {
 }
 
 func coSurvey(records [][]string) [][]string {
-	companys := [][]string{{"2000100100000001", "トヨタ東京販売ホールディングス（株）", "0"},
-		{"2000100100000002", "東京トヨタ自動車（株）", "0"},
-		{"2000100100000003", "東京トヨペット（株）", "0"},
-		{"2000100100000006", "ネッツトヨタ東京（株）", "0"},
-		{"2000100100000005", "（株）トヨテック", "0"},
-		{"2000100100000991", "株式会社　センチュリーサービス", "0"},
-		{"2000100100000004", "トヨタアドミニスタ株式会社", "0"},
-		{"2000100100000911", "株式会社　トヨテック", "0"},
+	companys := [][]string{{"2000100100000001", "トヨタモビリティ東京（株）", "0"},
+		{"2000100100000026", "ティーシーサービス（株）", "0"},
+		{"2000100100000011", "東京トヨタカーライフサービス（株）", "0"},
+		{"2000100100000025", "（株）ユタカ産業アメニティーサービス", "0"},
+		{"2000100100000008", "（株）トヨテック", "0"},
+		{"2000100100009002", "トヨタ東京カローラ（株）", "0"},
+		{"2000100100009004", "（株）センチュリーサービス", "0"},
 	}
 
 	coRecMax := len(records)
@@ -118,7 +117,7 @@ func coSurvey(records [][]string) [][]string {
 func dirCreate(path string) string {
 	day := time.Now()
 	outDir, _ := filepath.Split(path)
-	outDirPlus := outDir + "/トヨタ東京販売ホールディングス" + day.Format("20060102")
+	outDirPlus := outDir + "/トヨタモビリティ東京" + day.Format("20060102")
 
 	if err := os.Mkdir(outDirPlus, 0777); err != nil {
 		log.Print(outDirPlus + "\r\n")
@@ -558,7 +557,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				cRec[I] = ""
 			}
 
-			if inRecs[J][4] == coRec[0] {
+			if inRecs[J][4] == coRec[0] && coseCheck(inRecs[J][13]) {
 				// 0.社員番号
 				if len(inRecs[J][0]) != 10 {
 					log.Printf("社員番号が10桁ではありません:%v\r\n", inRecs[J][0])
@@ -747,10 +746,10 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				cRec[56] = inRecs[J][65]
 
 				// 57.尿糖
-				cRec[57] = inRecs[J][66]
+				cRec[57] = nyouT(inRecs[J][66])
 
 				// 58.尿蛋白
-				cRec[58] = inRecs[J][67]
+				cRec[58] = nyouT(inRecs[J][67])
 
 				// 59.尿潜血
 				cRec[59] = inRecs[J][68]
@@ -987,6 +986,9 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				// 148.コメント
 
 				// 149.総合判定
+				if inRecs[J][135] == "" {
+					log.Print("総合判定が抜けている方がいます。")
+				}
 				cRec[149] = inRecs[J][135]
 
 				// 150.受診勧奨区分
@@ -1218,7 +1220,7 @@ func meiboCreate(filename string, inRecs [][]string, coRecs [][]string) {
 
 		r := 0
 		for _, inRec := range inRecs {
-			if coRec[0] == inRec[4] || inRec[4] == "所属cd１" {
+			if (coRec[0] == inRec[4] && coseCheck(inRec[13])) || inRec[4] == "所属cd１" {
 				jRec[0] = inRec[4]
 				jRec[1] = inRec[5]
 				jRec[2] = inRec[6]
@@ -1372,6 +1374,31 @@ func nyou(s string) string {
 		s = "6"
 	case "5+":
 		s = "6"
+	default:
+		s = "err"
+	}
+	return s
+}
+
+func nyouT(s string) string {
+
+	switch s {
+	case "":
+		s = ""
+	case "－":
+		s = "－"
+	case "+-":
+		s = "±"
+	case "＋":
+		s = "+"
+	case "2+":
+		s = "++"
+	case "3+":
+		s = "+++"
+	case "4+":
+		s = "++++"
+	case "5+":
+		s = "++++"
 	default:
 		s = "err"
 	}
@@ -1543,5 +1570,20 @@ func syokugo(t, h string) bool {
 	} else {
 		return false
 	}
+
+}
+
+func coseCheck(cose string) bool {
+	// 定健コースかチェックする。20001001000001_ﾄﾖﾀ_34才以下,20001001000002_ﾄﾖﾀ_35才以上,20001001000003_ﾄﾖﾀ_関連35才以上,20001001000007_ﾄﾖﾀ_関連35才以上_便潜血
+	// 雇い入れ時健診追加。20001001000005トヨタ_雇入時
+	coses := []string{"20001001000001", "20001001000002", "20001001000003", "20001001000007", "20001001000005"}
+
+	for _, chkcose := range coses {
+		if cose == chkcose {
+			return true
+		}
+	}
+
+	return false
 
 }
