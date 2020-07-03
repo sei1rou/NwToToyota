@@ -84,7 +84,7 @@ func readfile(filename string) [][]string {
 func coSurvey(records [][]string) [][]string {
 	companys := [][]string{{"2000100100000001", "トヨタモビリティ東京（株）", "0"},
 		{"2000100100000026", "ティーシーサービス（株）", "0"},
-		{"2000100100000011", "東京トヨタカーライフサービス（株）", "0"},
+		{"9500100100000001", "トヨタモビリティ東京（株）", "0"},
 		{"2000100100000025", "（株）ユタカ産業アメニティーサービス", "0"},
 		{"2000100100000008", "（株）トヨテック", "0"},
 		{"2000100100009002", "トヨタ東京カローラ（株）", "0"},
@@ -129,11 +129,10 @@ func dirCreate(path string) string {
 }
 
 func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
-	var excelFile *xlsx.File
-	var sheet *xlsx.Sheet
-	var err error
+	// var excelFile *xlsx.File
+	// var sheet *xlsx.Sheet
+	var vcell *xlsx.Cell
 	var r int
-	var c int
 	var cell string
 
 	recLen := 221 //出力するレコードの項目数
@@ -156,9 +155,9 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		*/
 
 		excelName := filename + coRec[1] + "健診データ" + day.Format("20060102") + ".xlsx"
-		excelFile = xlsx.NewFile()
+		excelFile := xlsx.NewFile()
 		xlsx.SetDefaultFont(11, "ＭＳ Ｐゴシック")
-		sheet, err = excelFile.AddSheet("データ")
+		sheet, err := excelFile.AddSheet("データ")
 		failOnError(err)
 
 		// 1行目（タイトル）
@@ -236,8 +235,11 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[219] = "knk_kenkork_kensa.kensa_val_046"
 		cRec[220] = "knk_kenkork_kensa.hantei_val_046"
 		//writer.Write(cRec)
-		for c, cell = range cRec {
-			sheet.Cell(0, c).Value = cell
+		row := sheet.AddRow()
+		for _, cell = range cRec {
+			//sheet.Cell(0, c).Value = cell
+			vcell = row.AddCell()
+			vcell.Value = cell
 		}
 
 		// 2行目（タイトル）
@@ -315,8 +317,10 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[219] = "検査コード046_医療機関側検査値"
 		cRec[220] = "検査コード046_医療機関側検査値"
 		//writer.Write(cRec)
-		for c, cell = range cRec {
-			sheet.Cell(1, c).Value = cell
+		row = sheet.AddRow()
+		for _, cell = range cRec {
+			vcell = row.AddCell()
+			vcell.Value = cell
 		}
 		// 3行目（タイトル）
 		for I, _ = range cRec {
@@ -545,8 +549,10 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 		cRec[219] = "心電図検査"
 		cRec[220] = "心電図判定"
 		//writer.Write(cRec)
-		for c, cell = range cRec {
-			sheet.Cell(2, c).Value = cell
+		row = sheet.AddRow()
+		for _, cell = range cRec {
+			vcell = row.AddCell()
+			vcell.Value = cell
 		}
 
 		// 4行目移行（データ）
@@ -1175,8 +1181,11 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 				cRec[220] = hanteiCode(string(norm.NFKC.Bytes([]byte(inRecs[J][77]))))
 
 				//writer.Write(cRec)
-				for c, cell = range cRec {
-					sheet.Cell(r, c).Value = cell
+				row = sheet.AddRow()
+				for _, cell = range cRec {
+					// sheet.Cell(r, c).Value = cell
+					vcell = row.AddCell()
+					vcell.Value = cell
 				}
 				r++
 			}
@@ -1192,6 +1201,7 @@ func dataConversion(filename string, inRecs [][]string, coRecs [][]string) {
 func meiboCreate(filename string, inRecs [][]string, coRecs [][]string) {
 	var excelFile *xlsx.File
 	var sheet *xlsx.Sheet
+	var vcell *xlsx.Cell
 	var err error
 
 	recLen := 14 //出力するレコードの項目数
@@ -1236,8 +1246,12 @@ func meiboCreate(filename string, inRecs [][]string, coRecs [][]string) {
 				jRec[12] = inRec[15]
 				jRec[13] = inRec[16]
 				//writer.Write(jRec)
-				for c, cell := range jRec {
-					sheet.Cell(r, c).Value = cell
+				row := sheet.AddRow()
+				for _, cell := range jRec {
+					// sheet.Cell(r, c).Value = cell
+					vcell = row.AddCell()
+					vcell.Value = cell
+
 				}
 				r++
 			}
@@ -1576,7 +1590,8 @@ func syokugo(t, h string) bool {
 func coseCheck(cose string) bool {
 	// 定健コースかチェックする。20001001000001_ﾄﾖﾀ_34才以下,20001001000002_ﾄﾖﾀ_35才以上,20001001000003_ﾄﾖﾀ_関連35才以上,20001001000007_ﾄﾖﾀ_関連35才以上_便潜血
 	// 雇い入れ時健診追加。20001001000005トヨタ_雇入時
-	coses := []string{"20001001000001", "20001001000002", "20001001000003", "20001001000007", "20001001000005"}
+	// 人間ドックデータ追加 95001001000401 ﾄﾖﾀ販売_すこやか,95001001000402 ﾄﾖﾀ販売_人間ドック
+	coses := []string{"20001001000001", "20001001000002", "20001001000003", "20001001000007", "20001001000005", "95001001000401", "95001001000402"}
 
 	for _, chkcose := range coses {
 		if cose == chkcose {
